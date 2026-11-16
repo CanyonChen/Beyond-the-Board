@@ -29,7 +29,7 @@ Planned tools: **Python, python-chess, pandas, scikit-learn, and matplotlib**.
 
 ## Project Status
 
-The repository currently contains the project proposal and group documentation. Data collection, implementation, experiments, and the final report are planned work; no empirical results are available yet.
+Every project update must include a new entry in the [project progress log](docs/Project_Progress.md). Write the entry in Chinese and record the date, contributor, what changed, and the next step. Link to the relevant file or result when available.
 
 Raw chess archives, generated datasets, model artifacts, and local temporary files are excluded from Git through [`.gitignore`](.gitignore).
 

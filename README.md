@@ -33,6 +33,8 @@ Every project update must include a new entry in the [project progress log](docs
 
 Raw chess archives, generated datasets, model artifacts, and local temporary files are excluded from Git through [`.gitignore`](.gitignore).
 
+- **2026-11-19** — Model implementation delivered: prevalence baseline, L2 logistic with splines and clock interactions, histogram boosting with internal early stopping disabled. Methodology in [docs/Methodology.md](docs/Methodology.md), presentation outline in [docs/Slides-outline.md](docs/Slides-outline.md), selection record in [results/selection.json](results/selection.json).
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

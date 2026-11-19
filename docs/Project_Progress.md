@@ -36,3 +36,5 @@
 | 2026-10-28 | 项目组 | 归档[项目提案](Team-Proposal-SixSixGoSmooth.pdf)和[成员名单](5001_GroupSixSixGoSmooth.docx)，建立数据、脚本与结果目录。 | 按提案开展 200 局试采样。 |
 | 2026-11-16 | 项目组 | 建立中文进度文档，并将每次更新均须登记的要求写入 [README](../README.md#project-status)。 | 各负责人补记已有成果，优先核对试采样统计与调参记录。 |
 | 2026-11-16 | Wenxi GUAN | 从lichess官网上下载数据并进行数据的预处理，已经放入data文件夹。 | 交付最终数据集 |
+| 2026-11-19 | Geyunqing SHI | 完成模型构建与实现并提交：`scripts/` 含失误率基线、L2 正则逻辑回归（样条 + 时钟×评分/时钟×阶段交互）与直方图梯度提升（关闭内部早停，5 组配置）；`results/selection.json` 记录三窗口 × 9 组配置的验证 log loss（逻辑回归最优 C=1，均 0.26770；梯度提升最优 31 叶/0.05/叶 100/L2=10，均 0.23523）。方法材料见 [Methodology](Methodology.md)，汇报提纲见 [Slides-outline](Slides-outline.md)。实际样本 913,510 步 / 11,812 局，源文件 953,174 行中 25,872 行为整局重复记录，已在脚本内去重、标签复算一致率 1.0000。 | Canyang CHEN 合并方法章节；Senyuan WU 接手评估与图表定稿；Siying CHEN 汇总报告与幻灯片。 |
+

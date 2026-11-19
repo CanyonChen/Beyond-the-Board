@@ -1,0 +1,27 @@
+{
+  // Never analyse third-party stubs, virtual environments or the archive.
+  "python.analysis.exclude": [
+    "**/typeshed-fallback/**",
+    "**/site-packages/**",
+    "**/.venv/**",
+    "**/versions/**",
+    "**/__pycache__/**"
+  ],
+  "python.analysis.ignore": [
+    "**/typeshed-fallback/**",
+    "**/versions/**"
+  ],
+  "pylint.ignorePatterns": [
+    "**/typeshed-fallback/**",
+    "**/site-packages/**",
+    "**/.venv/**",
+    "**/versions/**"
+  ],
+  "pylint.args": ["--max-line-length=100"],
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true
+  },
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true
+}

@@ -1,0 +1,21 @@
+# Static-analysis configuration for the course project.
+# The archived iterations in versions/ are kept for provenance, not maintained,
+# so they are excluded from linting. Pylance's bundled typeshed stubs are not
+# project code either and must never be reported.
+
+[tool.pylint.main]
+ignore-paths = [
+    "^versions/",
+    "^\\.venv/",
+    "site-packages",
+    "typeshed-fallback",
+]
+ignore = ["__pycache__"]
+
+[tool.pylint."messages control"]
+# W0621: script-style global flow in the archived v4 pipeline.
+# C0103/C0116/C0325: naming and readability preferences, not defects.
+disable = ["W0621", "C0103", "C0116", "C0325"]
+
+[tool.pylint.format]
+max-line-length = 100

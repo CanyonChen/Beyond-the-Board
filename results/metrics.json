@@ -1,0 +1,659 @@
+{
+  "protocol": {
+    "windows": [
+      {
+        "train_days": "1-8",
+        "valid_days": "9-13"
+      },
+      {
+        "train_days": "1-13",
+        "valid_days": "14-18"
+      },
+      {
+        "train_days": "1-18",
+        "valid_days": "19-23"
+      }
+    ],
+    "fit_days": "1-23",
+    "test_days": "24-30",
+    "selection_rule": "minimum mean validation log loss",
+    "class_weights": "none (natural distribution)",
+    "hgb_early_stopping": false,
+    "hgb_max_iter": 250,
+    "configs_per_model": {
+      "logistic": 4,
+      "hgb": 5
+    },
+    "features": {
+      "spline": [
+        "log_clk_mover",
+        "log_clk_opp",
+        "mover_rating",
+        "move_no"
+      ],
+      "linear": [
+        "clk_ratio",
+        "rating_diff",
+        "opp_rating",
+        "prev_think_time",
+        "think_time_mean3",
+        "think_missing",
+        "material_adv_cp",
+        "nonpawn_material",
+        "legal_moves",
+        "in_check",
+        "mover_is_white",
+        "pre_move_eval_cp"
+      ],
+      "interactions": [
+        "clk_x_rating",
+        "clk_x_phase_*"
+      ]
+    }
+  },
+  "data": {
+    "source_file": "moves.csv.gz",
+    "source_bytes": 20696869,
+    "rows_in_file": 953174,
+    "duplicate_rows_removed": 25872,
+    "rows_used": 913510,
+    "games_used": 11812,
+    "positive_rate": 0.08309378112992742,
+    "date_min": "2026-09-01",
+    "date_max": "2026-09-30",
+    "label_rule": "winning chance drops by >= 10 pp",
+    "label_check_rows": 903656,
+    "label_check_agreement": 1.0,
+    "evaluation_handling": "finite engine evaluations only, no centipawn cap",
+    "constant_columns_dropped": [
+      "think_missing"
+    ]
+  },
+  "selection": {
+    "selected": {
+      "logistic": {
+        "name": "lr_C1",
+        "mean_valid_log_loss": 0.2676954568171877,
+        "per_window": [
+          {
+            "window": 1,
+            "log_loss": 0.2692567746803936,
+            "brier": 0.07491199028614448,
+            "roc_auc": 0.7156175875416197,
+            "average_precision": 0.17449986393379377
+          },
+          {
+            "window": 2,
+            "log_loss": 0.26571951787518644,
+            "brier": 0.07350089834372854,
+            "roc_auc": 0.7118458664137447,
+            "average_precision": 0.16913766215764336
+          },
+          {
+            "window": 3,
+            "log_loss": 0.2681100778959832,
+            "brier": 0.07447611215755119,
+            "roc_auc": 0.7098507139023581,
+            "average_precision": 0.16739294584661266
+          }
+        ]
+      },
+      "hgb": {
+        "name": "leaves31_lr0.05_leaf100_l2_10",
+        "mean_valid_log_loss": 0.23523133824599432,
+        "per_window": [
+          {
+            "window": 1,
+            "log_loss": 0.2386400757442127,
+            "brier": 0.06919168306706001,
+            "roc_auc": 0.814378437245694,
+            "average_precision": 0.27754603746612855
+          },
+          {
+            "window": 2,
+            "log_loss": 0.232645706517086,
+            "brier": 0.06756744970581299,
+            "roc_auc": 0.8203965281183245,
+            "average_precision": 0.2751598014094217
+          },
+          {
+            "window": 3,
+            "log_loss": 0.23440823247668427,
+            "brier": 0.0682558210953976,
+            "roc_auc": 0.8202883149025095,
+            "average_precision": 0.27710277560587704
+          }
+        ]
+      }
+    },
+    "rows": {
+      "logistic": [
+        {
+          "window": 1,
+          "family": "logistic",
+          "name": "lr_C0.03",
+          "train_moves": 247201,
+          "valid_moves": 131426,
+          "seconds": 0.7127805999480188,
+          "log_loss": 0.27005461411219,
+          "brier": 0.0749931125970839,
+          "roc_auc": 0.7137038275764219,
+          "average_precision": 0.17370091533206927,
+          "mean_prediction": 0.0791368127347236
+        },
+        {
+          "window": 1,
+          "family": "logistic",
+          "name": "lr_C0.1",
+          "train_moves": 247201,
+          "valid_moves": 131426,
+          "seconds": 0.5090921999653801,
+          "log_loss": 0.26993996538564524,
+          "brier": 0.07498520230006661,
+          "roc_auc": 0.713710119281018,
+          "average_precision": 0.17355020422659295,
+          "mean_prediction": 0.0795874124317842
+        },
+        {
+          "window": 1,
+          "family": "logistic",
+          "name": "lr_C0.3",
+          "train_moves": 247201,
+          "valid_moves": 131426,
+          "seconds": 0.5175627999706194,
+          "log_loss": 0.2699274002943351,
+          "brier": 0.07498612841680197,
+          "roc_auc": 0.7134678490952259,
+          "average_precision": 0.1734760949473535,
+          "mean_prediction": 0.07973193153793544
+        },
+        {
+          "window": 1,
+          "family": "logistic",
+          "name": "lr_C1",
+          "train_moves": 247201,
+          "valid_moves": 131426,
+          "seconds": 1.122264999896288,
+          "log_loss": 0.2692567746803936,
+          "brier": 0.07491199028614448,
+          "roc_auc": 0.7156175875416197,
+          "average_precision": 0.17449986393379377,
+          "mean_prediction": 0.07997906480311434
+        },
+        {
+          "window": 2,
+          "family": "logistic",
+          "name": "lr_C0.03",
+          "train_moves": 378627,
+          "valid_moves": 158367,
+          "seconds": 0.9630755000980571,
+          "log_loss": 0.26575141381199696,
+          "brier": 0.07345482657361026,
+          "roc_auc": 0.7117439630495792,
+          "average_precision": 0.1700246605760141,
+          "mean_prediction": 0.08333429600208803
+        },
+        {
+          "window": 2,
+          "family": "logistic",
+          "name": "lr_C0.1",
+          "train_moves": 378627,
+          "valid_moves": 158367,
+          "seconds": 1.0853459000354633,
+          "log_loss": 0.26565707423245194,
+          "brier": 0.07346073565746047,
+          "roc_auc": 0.7121142900451726,
+          "average_precision": 0.16989212506013868,
+          "mean_prediction": 0.08349113219632624
+        },
+        {
+          "window": 2,
+          "family": "logistic",
+          "name": "lr_C0.3",
+          "train_moves": 378627,
+          "valid_moves": 158367,
+          "seconds": 1.9993089999770746,
+          "log_loss": 0.265093512249897,
+          "brier": 0.07342175589493469,
+          "roc_auc": 0.714349316499277,
+          "average_precision": 0.17027858888336855,
+          "mean_prediction": 0.08371424499269747
+        },
+        {
+          "window": 2,
+          "family": "logistic",
+          "name": "lr_C1",
+          "train_moves": 378627,
+          "valid_moves": 158367,
+          "seconds": 0.887297699926421,
+          "log_loss": 0.26571951787518644,
+          "brier": 0.07350089834372854,
+          "roc_auc": 0.7118458664137447,
+          "average_precision": 0.16913766215764336,
+          "mean_prediction": 0.08365837436361873
+        },
+        {
+          "window": 3,
+          "family": "logistic",
+          "name": "lr_C0.03",
+          "train_moves": 536994,
+          "valid_moves": 163221,
+          "seconds": 1.5017542999703437,
+          "log_loss": 0.2688658603497547,
+          "brier": 0.07449617201443139,
+          "roc_auc": 0.7072164553258875,
+          "average_precision": 0.16733583039611571,
+          "mean_prediction": 0.08331842967677043
+        },
+        {
+          "window": 3,
+          "family": "logistic",
+          "name": "lr_C0.1",
+          "train_moves": 536994,
+          "valid_moves": 163221,
+          "seconds": 2.0551833000499755,
+          "log_loss": 0.2686271602820058,
+          "brier": 0.07448482621466358,
+          "roc_auc": 0.7082833744107406,
+          "average_precision": 0.16736998922057286,
+          "mean_prediction": 0.08333023713449964
+        },
+        {
+          "window": 3,
+          "family": "logistic",
+          "name": "lr_C0.3",
+          "train_moves": 536994,
+          "valid_moves": 163221,
+          "seconds": 2.9000171999214217,
+          "log_loss": 0.26827276529536165,
+          "brier": 0.07445799080751973,
+          "roc_auc": 0.7094975545975547,
+          "average_precision": 0.1677956591554219,
+          "mean_prediction": 0.08359715741823637
+        },
+        {
+          "window": 3,
+          "family": "logistic",
+          "name": "lr_C1",
+          "train_moves": 536994,
+          "valid_moves": 163221,
+          "seconds": 3.2881388999521732,
+          "log_loss": 0.2681100778959832,
+          "brier": 0.07447611215755119,
+          "roc_auc": 0.7098507139023581,
+          "average_precision": 0.16739294584661266,
+          "mean_prediction": 0.08374595021233229
+        }
+      ],
+      "hgb": [
+        {
+          "window": 1,
+          "family": "hgb",
+          "name": "leaves15_lr0.10_leaf100_l2_1",
+          "train_moves": 247201,
+          "valid_moves": 131426,
+          "seconds": 3.023365500033833,
+          "log_loss": 0.23911246201543823,
+          "brier": 0.06935656792947464,
+          "roc_auc": 0.8134187811196109,
+          "average_precision": 0.2726836207283465,
+          "mean_prediction": 0.07892771695090126
+        },
+        {
+          "window": 1,
+          "family": "hgb",
+          "name": "leaves31_lr0.10_leaf50_l2_1",
+          "train_moves": 247201,
+          "valid_moves": 131426,
+          "seconds": 3.3324378998950124,
+          "log_loss": 0.23919061615266554,
+          "brier": 0.06936571405384301,
+          "roc_auc": 0.8134022909973816,
+          "average_precision": 0.2725487441256296,
+          "mean_prediction": 0.0791656036129595
+        },
+        {
+          "window": 1,
+          "family": "hgb",
+          "name": "leaves31_lr0.05_leaf50_l2_1",
+          "train_moves": 247201,
+          "valid_moves": 131426,
+          "seconds": 3.585779400076717,
+          "log_loss": 0.2386259659967394,
+          "brier": 0.0692237941786853,
+          "roc_auc": 0.8146224110497009,
+          "average_precision": 0.2762808012911244,
+          "mean_prediction": 0.07879673486161917
+        },
+        {
+          "window": 1,
+          "family": "hgb",
+          "name": "leaves63_lr0.05_leaf50_l2_1",
+          "train_moves": 247201,
+          "valid_moves": 131426,
+          "seconds": 4.255848799948581,
+          "log_loss": 0.23879781144089615,
+          "brier": 0.06927765238289861,
+          "roc_auc": 0.8142903019918236,
+          "average_precision": 0.2744623179176488,
+          "mean_prediction": 0.07908211345231037
+        },
+        {
+          "window": 1,
+          "family": "hgb",
+          "name": "leaves31_lr0.05_leaf100_l2_10",
+          "train_moves": 247201,
+          "valid_moves": 131426,
+          "seconds": 3.644242500071414,
+          "log_loss": 0.2386400757442127,
+          "brier": 0.06919168306706001,
+          "roc_auc": 0.814378437245694,
+          "average_precision": 0.27754603746612855,
+          "mean_prediction": 0.07879125230859314
+        },
+        {
+          "window": 2,
+          "family": "hgb",
+          "name": "leaves15_lr0.10_leaf100_l2_1",
+          "train_moves": 378627,
+          "valid_moves": 158367,
+          "seconds": 4.496443600044586,
+          "log_loss": 0.23284962081892915,
+          "brier": 0.06762668494494867,
+          "roc_auc": 0.8198210769765286,
+          "average_precision": 0.2739256965345419,
+          "mean_prediction": 0.08304139374211437
+        },
+        {
+          "window": 2,
+          "family": "hgb",
+          "name": "leaves31_lr0.10_leaf50_l2_1",
+          "train_moves": 378627,
+          "valid_moves": 158367,
+          "seconds": 6.21414499997627,
+          "log_loss": 0.23303338234388787,
+          "brier": 0.0677101134873927,
+          "roc_auc": 0.8193024611861348,
+          "average_precision": 0.2726516147701829,
+          "mean_prediction": 0.08349692450736586
+        },
+        {
+          "window": 2,
+          "family": "hgb",
+          "name": "leaves31_lr0.05_leaf50_l2_1",
+          "train_moves": 378627,
+          "valid_moves": 158367,
+          "seconds": 5.432402100064792,
+          "log_loss": 0.2326056389302228,
+          "brier": 0.06755493933507234,
+          "roc_auc": 0.8205016886344105,
+          "average_precision": 0.27499589301355853,
+          "mean_prediction": 0.08299753446242322
+        },
+        {
+          "window": 2,
+          "family": "hgb",
+          "name": "leaves63_lr0.05_leaf50_l2_1",
+          "train_moves": 378627,
+          "valid_moves": 158367,
+          "seconds": 6.33302089991048,
+          "log_loss": 0.23251937219350732,
+          "brier": 0.067583645053638,
+          "roc_auc": 0.8206277118194261,
+          "average_precision": 0.2743476574576216,
+          "mean_prediction": 0.08316090916662418
+        },
+        {
+          "window": 2,
+          "family": "hgb",
+          "name": "leaves31_lr0.05_leaf100_l2_10",
+          "train_moves": 378627,
+          "valid_moves": 158367,
+          "seconds": 5.6793280999409035,
+          "log_loss": 0.232645706517086,
+          "brier": 0.06756744970581299,
+          "roc_auc": 0.8203965281183245,
+          "average_precision": 0.2751598014094217,
+          "mean_prediction": 0.08303586917611165
+        },
+        {
+          "window": 3,
+          "family": "hgb",
+          "name": "leaves15_lr0.10_leaf100_l2_1",
+          "train_moves": 536994,
+          "valid_moves": 163221,
+          "seconds": 8.304956200066954,
+          "log_loss": 0.23457657843131147,
+          "brier": 0.06831698965628855,
+          "roc_auc": 0.8196523172901328,
+          "average_precision": 0.27653001823262324,
+          "mean_prediction": 0.08166017650213778
+        },
+        {
+          "window": 3,
+          "family": "hgb",
+          "name": "leaves31_lr0.10_leaf50_l2_1",
+          "train_moves": 536994,
+          "valid_moves": 163221,
+          "seconds": 9.179011399974115,
+          "log_loss": 0.23461806170435415,
+          "brier": 0.06834206190861387,
+          "roc_auc": 0.8195316013654902,
+          "average_precision": 0.27532657867987476,
+          "mean_prediction": 0.08211135865829561
+        },
+        {
+          "window": 3,
+          "family": "hgb",
+          "name": "leaves31_lr0.05_leaf50_l2_1",
+          "train_moves": 536994,
+          "valid_moves": 163221,
+          "seconds": 10.860078099998645,
+          "log_loss": 0.234478131044582,
+          "brier": 0.06827390976838553,
+          "roc_auc": 0.8201079451913692,
+          "average_precision": 0.27669623860170545,
+          "mean_prediction": 0.0817449716959297
+        },
+        {
+          "window": 3,
+          "family": "hgb",
+          "name": "leaves63_lr0.05_leaf50_l2_1",
+          "train_moves": 536994,
+          "valid_moves": 163221,
+          "seconds": 12.302154599921778,
+          "log_loss": 0.23438528702934222,
+          "brier": 0.06826871368608374,
+          "roc_auc": 0.8200995444633585,
+          "average_precision": 0.27729119635563504,
+          "mean_prediction": 0.08196378952718239
+        },
+        {
+          "window": 3,
+          "family": "hgb",
+          "name": "leaves31_lr0.05_leaf100_l2_10",
+          "train_moves": 536994,
+          "valid_moves": 163221,
+          "seconds": 11.002734000096098,
+          "log_loss": 0.23440823247668427,
+          "brier": 0.0682558210953976,
+          "roc_auc": 0.8202883149025095,
+          "average_precision": 0.27710277560587704,
+          "mean_prediction": 0.08176385474644572
+        }
+      ]
+    }
+  },
+  "test": {
+    "logistic": {
+      "log_loss": 0.2666046789995254,
+      "brier": 0.0736850481653268,
+      "roc_auc": 0.7081770141368366,
+      "average_precision": 0.16723729893059697,
+      "mean_prediction": 0.08382155920111946,
+      "threshold": 0.11927594677547522,
+      "accuracy": 0.767401955038796,
+      "precision": 0.16829986836881802,
+      "recall": 0.4509825877610436,
+      "f1": 0.24512339855756063,
+      "predicted_positive_rate": 0.2243887573548372,
+      "test_prevalence": 0.08373848425889027
+    },
+    "hgb": {
+      "log_loss": 0.23127076472870345,
+      "brier": 0.06736996720511042,
+      "roc_auc": 0.8234750043338245,
+      "average_precision": 0.2800339721215074,
+      "mean_prediction": 0.08186192991406946,
+      "threshold": 0.16448509603974293,
+      "accuracy": 0.8309336833962353,
+      "precision": 0.2575531518090265,
+      "recall": 0.5412350932198645,
+      "f1": 0.3490206697355357,
+      "predicted_positive_rate": 0.17597224501277572,
+      "test_prevalence": 0.08373848425889027
+    },
+    "prevalence_benchmark": {
+      "log_loss": 0.287811058053105,
+      "brier": 0.07672705794270977,
+      "roc_auc": 0.5,
+      "average_precision": 0.08373848425889027,
+      "mean_prediction": 0.08289739579986145,
+      "test_prevalence": 0.08373848425889027
+    }
+  },
+  "bootstrap": {
+    "hgb_minus_logistic": {
+      "resampling": "whole test games, paired",
+      "n_bootstrap": 1000,
+      "delta_log_loss": -0.0353666029154157,
+      "delta_log_loss_ci95": [
+        -0.036797795097768156,
+        -0.03397620189968999
+      ],
+      "delta_average_precision": 0.11295607363688162,
+      "delta_average_precision_ci95": [
+        0.10646777654632282,
+        0.11966426093895476
+      ]
+    },
+    "hgb_minus_prevalence_benchmark": {
+      "resampling": "whole test games, paired",
+      "n_bootstrap": 1000,
+      "delta_log_loss": -0.05657555897773346,
+      "delta_log_loss_ci95": [
+        -0.05841391511560512,
+        -0.054883414348237104
+      ],
+      "delta_average_precision": 0.19647134076591885,
+      "delta_average_precision_ci95": [
+        0.18881374865056633,
+        0.20384555847004684
+      ]
+    }
+  },
+  "ablations": {
+    "without_clock_and_think_time": {
+      "features": 21,
+      "logistic": {
+        "log_loss": 0.2715792193602225,
+        "brier": 0.07449747915817277,
+        "roc_auc": 0.6837866772018073,
+        "average_precision": 0.14364354295220233,
+        "mean_prediction": 0.0840400475776057,
+        "delta_log_loss_vs_full": 0.004974540360697111,
+        "delta_average_precision_vs_full": -0.023593755978394637
+      },
+      "hgb": {
+        "log_loss": 0.2357349440296928,
+        "brier": 0.06836739742406248,
+        "roc_auc": 0.8122527764321069,
+        "average_precision": 0.25912904145400245,
+        "mean_prediction": 0.08243312497344422,
+        "delta_log_loss_vs_full": 0.004464179300989357,
+        "delta_average_precision_vs_full": -0.02090493066750493
+      }
+    },
+    "without_pre_move_evaluation": {
+      "features": 37,
+      "logistic": {
+        "log_loss": 0.26597987460963946,
+        "brier": 0.07363826338948343,
+        "roc_auc": 0.7096874505952934,
+        "average_precision": 0.1675542311498342,
+        "mean_prediction": 0.08392281525029235,
+        "delta_log_loss_vs_full": -0.0006248043898859357,
+        "delta_average_precision_vs_full": 0.00031693221923723147
+      },
+      "hgb": {
+        "log_loss": 0.2525544334243971,
+        "brier": 0.07141123012726966,
+        "roc_auc": 0.7606304898391444,
+        "average_precision": 0.20416853097479548,
+        "mean_prediction": 0.08270576137699126,
+        "delta_log_loss_vs_full": 0.021283668695693647,
+        "delta_average_precision_vs_full": -0.0758654411467119
+      }
+    }
+  },
+  "label_sensitivity": {
+    "5pp": {
+      "moves": 903656,
+      "positive_rate": 0.16312512726081607,
+      "logistic": {
+        "log_loss": 0.4139289393732474,
+        "brier": 0.1286289920448496,
+        "roc_auc": 0.6906511069687249,
+        "average_precision": 0.2827968016273897,
+        "mean_prediction": 0.16448856135840617
+      },
+      "hgb": {
+        "log_loss": 0.36685000497981335,
+        "brier": 0.11594605644489805,
+        "roc_auc": 0.7911352363058162,
+        "average_precision": 0.3940514053002593,
+        "mean_prediction": 0.16114291875841058
+      }
+    },
+    "15pp": {
+      "moves": 903656,
+      "positive_rate": 0.05107917172021212,
+      "logistic": {
+        "log_loss": 0.1880021721296248,
+        "brier": 0.04775881724942955,
+        "roc_auc": 0.7263096346046302,
+        "average_precision": 0.11447618654953279,
+        "mean_prediction": 0.051549361873019395
+      },
+      "hgb": {
+        "log_loss": 0.16318781276495015,
+        "brier": 0.0444390037601343,
+        "roc_auc": 0.8389408323951563,
+        "average_precision": 0.21305189079077103,
+        "mean_prediction": 0.05035630859378811
+      }
+    },
+    "150cp": {
+      "moves": 903656,
+      "positive_rate": 0.09655665430207955,
+      "logistic": {
+        "log_loss": 0.2902904819664417,
+        "brier": 0.08369825082901088,
+        "roc_auc": 0.7324278997880613,
+        "average_precision": 0.21114529785553848,
+        "mean_prediction": 0.09743091114211165
+      },
+      "hgb": {
+        "log_loss": 0.26227549139687506,
+        "brier": 0.07768337134302218,
+        "roc_auc": 0.8109344255762453,
+        "average_precision": 0.3075858631480342,
+        "mean_prediction": 0.09688477359181438
+      }
+    }
+  },
+  "not_applicable": {
+    "player_disjoint_check": "no player identifiers in the move table",
+    "mate_inclusive_sensitivity": "no mate evaluations in the annotated sample"
+  }
+}

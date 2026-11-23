@@ -1,0 +1,24 @@
+{
+  "requested_game_ids": 11833,
+  "returned_game_ids": 11833,
+  "missing_game_ids": [],
+  "json_vs_rounded_pgn_by_index_offset": {
+    "0": {
+      "n": 926332,
+      "within_pgn_rounding": 926332,
+      "max_abs_s": 0.5,
+      "mean_abs_s": 0.24370240907146626
+    },
+    "1": {
+      "n": 926332,
+      "within_pgn_rounding": 52856,
+      "max_abs_s": 590.9300000000001,
+      "mean_abs_s": 18.606532852149176
+    }
+  },
+  "archived_clk_opponent": {
+    "archived_labeled_plies_with_clocks": 913510,
+    "agrees_with_movers_current_post_move_clock": 913510,
+    "agrees_with_opponents_correct_turn_start_clock": 15478
+  }
+}

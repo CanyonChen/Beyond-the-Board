@@ -1,4 +1,6 @@
-# Results
+# Archived results from the distributed move table
+
+The figures and tables below accompany the archived `results/metrics.json`. Original clock features include a one-half-move alignment error. Use these numbers for historical reproduction; use the [source-verified experiment ledger](../experiment/results.md) for the study conclusions.
 
 All numbers below are produced by `scripts/train_model.py` and stored in
 `results/metrics.json`; every figure is exported to `results/` as PDF (vector)
@@ -11,10 +13,7 @@ and moves without a label, the analysis sample contains 913,510 moves from
 11,812 games played between 1 and 30 September 2026, with a positive rate of
 8.31%. The label was re-derived from adjacent engine evaluations: the study
 definition (`W(c_before) − W(c_after) ≥ 10` percentage points) reproduces the
-stored label on all 903,656 rows where both evaluations exist. Engine
-evaluations are used as delivered, without centipawn caps or sentinel
-replacement. Because the moving player is not identified in the table, games
-are the only available clustering unit.
+stored label on all 903,656 rows where both evaluations exist. The training step consumed the numeric scores already stored in the table; the preceding conversion could encode forced mates as proxy scores. The distributed table has game identifiers but no player identifiers.
 
 **Table 1. Analysis sample.**
 
@@ -100,9 +99,7 @@ over-predicts in its top bin (0.215 against 0.198).
 **Figure 2.** Permutation importance for the selected boosting model: mean drop
 in test ROC-AUC when a raw input is shuffled (50,000 sampled moves, five
 repeats). The pre-move evaluation dominates (0.192), followed by mover rating
-(0.034), move number (0.029) and material advantage (0.028); remaining time and
-its log are individually small, which reflects correlation between the clock
-and the position rather than absence of signal (see the ablation below).
+(0.034), move number (0.029) and material advantage (0.028). Importance values for the historical clock fields describe the misaligned inputs and cannot identify the value of the true pre-move clocks.
 
 ## 4.4 Ablations
 
@@ -116,9 +113,8 @@ Each ablation refits the selected configuration under the same protocol.
 | No clock or thinking-time inputs | 0.27158 | +0.0050 | 0.23573 | +0.0045 |
 | No pre-move evaluation | 0.26598 | −0.0006 | 0.25255 | +0.0213 |
 
-Removing the clock raises log loss for both models and lowers average
-precision by 0.024 (logistic) and 0.021 (boosting), so remaining time carries
-information beyond rating and the board. The pre-move evaluation is used very
+Removing the stored timing columns raises log loss for both models and lowers average
+precision by 0.024 (logistic) and 0.021 (boosting). The alignment error prevents attributing this difference to information available at the start of a turn. The pre-move evaluation is used very
 differently by the two models: removing it is neutral for the linear model
 (−0.0006, within noise) but costly for boosting (+0.0213 log loss, −0.076
 average precision). The flexible model therefore earns part of its advantage by
@@ -147,27 +143,16 @@ definitions because prevalence changes.
 
 ![Blunder rate by clock, rating and phase](../results/eda_rates.png)
 
-**Figure 3.** Blunder rate with sample counts by remaining time, mover rating
-and game phase (descriptive only; no adjustment). Rates are higher in the
-middlegame (0.110) than in the opening (0.031) or the endgame (0.061), and
-highest in the 60–120 s band (0.106). The pattern across remaining time is not
-monotone: the 120–180 s band shows the lowest rate (0.067) because it is
-dominated by opening moves, where blunders are rare. Clock, phase and move
-number are therefore strongly confounded, which is why the association is
-estimated in a multivariable model rather than read off marginal rates.
+**Figure 3.** Archived sample counts and unadjusted error rates by stored clock field, mover rating and game phase. Rates were higher in the middlegame (0.110) than in the opening (0.031) or the endgame (0.061). The clock bins group values from the old table. For actual turn-start clocks, see the corrected comparisons and adjusted time profiles in the [experiment ledger](../experiment/results.md).
 
 ## 4.7 Limitations
 
 1. **No player identifiers.** Games are the only clustering unit, and the
-   pre-registered player-disjoint check cannot be run. Repeated players remain
+   proposed player-disjoint check could not be run on this table. Repeated players remain
    an unmodelled dependence, also inside the bootstrap intervals.
-2. **No mate evaluations.** The annotated sample contains finite engine scores
-   only, so the mate-inclusive sensitivity analysis cannot be reconstructed.
+2. **Missing mate flags.** The archived move table contains only numeric engine scores. The original converter used proxy scores for mate annotations, so their provenance cannot be recovered from those columns alone.
 3. **Sampling.** The sample is larger than the planning estimate (11,812 rather
    than ≤3,000 games), which tightens the intervals but does not remove
    selection on games that carry clocks and engine annotations.
-4. **Scope.** One time control and one month; results need not generalise to
-   other clock regimes or periods.
-5. **Interpretation.** Engine availability, unmeasured position difficulty and
-   clocks running down with game length prevent a causal reading of time
-   pressure; the clock ablation measures predictive value only.
+4. **Scope.** One month of annotated blitz games. The old collector did not enforce initial time and increment; its sample contains more than the proposed 180+0 control.
+5. **Interpretation.** The archived timing ablation describes how the stored columns affected a retrospective model. Source-verified pre-move clocks are necessary to estimate the available predictive gain. Engine availability, position difficulty and game length also limit causal interpretation.

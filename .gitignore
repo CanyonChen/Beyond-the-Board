@@ -20,16 +20,21 @@ __pycache__/
 *.pgn.zst
 /data/raw/
 /data/interim/
-/data/processed/
+/data/processed/*
+!/data/processed/recovery_counts.json
+!/data/processed/clock_audit.json
+!/data/processed/moves_verified.csv.gz
 
 # Trained models and generated experiment outputs
 *.joblib
+!/results/model_comparison/verified_180_0/selected_model.joblib
 *.pkl
 /models/
 /outputs/
 
 # Temporary files and logs
 /tmp/
+/docs/report/.build/
 *.log
 
 # macOS metadata and Microsoft Word temporary files

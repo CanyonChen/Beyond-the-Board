@@ -1,0 +1,56 @@
+{
+  "matplotlib": "3.11.2",
+  "palette": {
+    "accent": "#BF165E",
+    "ink": "#1D1D1F",
+    "muted": "#555D61",
+    "line": "#D5DADA"
+  },
+  "figures": {
+    "clock_alignment": {
+      "title": "Clock alignment in the archived move data",
+      "description": "Agreement with PGN clocks. Corrected index: 926,332/926,332 (100%); Archived index: 52,856/926,332 (5.71%). Archived opponent clock. Mover after move: 913,510/913,510 (100%); Opponent before move: 15,478/913,510 (1.69%). The exact-match outcomes in the second panel can overlap.",
+      "size_mm": [
+        228.6,
+        68.6
+      ],
+      "sources": {
+        "data/processed/clock_audit.json": "2f92854ab1c0eb2b11b8648d44ee1ee719a9929f134a999191fcda504ebca825"
+      }
+    },
+    "feature_gains": {
+      "title": "Incremental predictive value of clock information",
+      "description": "Final-week histogram gradient boosting with the zero-risk rule. Add both clocks: 0.000893 [0.000510, 0.001284]. Then add recent time use: 0.000125 [0.000006, 0.000246]. Both additions vs baseline: 0.001018 [0.000658, 0.001429]. Intervals are paired 95% percentiles from 1,000 whole-game resamples.",
+      "size_mm": [
+        208.3,
+        67.3
+      ],
+      "sources": {
+        "results/model_comparison/verified_180_0/paired_log_loss.csv": "6ab25f2273c634aa0d44be8cb6df486da0326bd4e25d9bded173cd1cf2e0dbdc"
+      }
+    },
+    "model_comparison": {
+      "title": "Predictive performance on the verified cohort",
+      "description": "Development · three-window mean. Training prevalence 0.290600, Logistic regression 0.265527, XGBoost 0.240731, Histogram boosting 0.239866. Final week · 24–30 September. Training prevalence 0.287146, Logistic regression 0.262458, XGBoost 0.235851, Histogram boosting 0.235150. All three fitted models use full inputs and the zero-risk rule. The prevalence baseline predicts the training event rate. The final week was previously evaluated.",
+      "size_mm": [
+        223.5,
+        76.2
+      ],
+      "sources": {
+        "results/model_comparison/verified_180_0/validation_means.csv": "55283f8f473e5a4db58db8cb8df16189bbe7aede984d5e088bbf3780014f7d41",
+        "results/model_comparison/verified_180_0/published_test_metrics.csv": "80cb5cd4a312a9b41f23c0fc711f7026004178f0db9ede0e5941c7f11c69ca2d"
+      }
+    },
+    "phase_error_rates": {
+      "title": "Observed final-week serious-error rates by game phase",
+      "description": "Opening: 1,468 serious errors in 49,954 moves (2.94%). Middlegame: 13,196 serious errors in 119,060 moves (11.08%). Endgame: 1,737 serious errors in 27,494 moves (6.32%). Overall: 16,401 serious errors in 196,508 moves (8.35%), 24–30 September.",
+      "size_mm": [
+        193.0,
+        67.3
+      ],
+      "sources": {
+        "results/model_comparison/clock_subgroups.csv": "62da03af0c86f884fd117e1d46719ffe47f6c21299737d0d207fbbe9d3813b87"
+      }
+    }
+  }
+}

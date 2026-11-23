@@ -1,120 +1,72 @@
-# Dataset Documentation — DSC5001 SixSixGoSmooth
+# Data for the chess blunder study
 
-**Project**: Predicting Chess Blunders Under Time Pressure
+The analysis unit is one player's turn in a Lichess game. The prediction uses information available before that player starts deciding. The target measures the fall in the engine's estimate of that player's winning chances after the move.
 
-**Data owner**: Wenxi GUAN (60237406)
+## Original sample and recovery
 
-**Deliverables**:
+The team originally sampled publicly available, analysed rated blitz games from September 2026. It started with leaderboard players, followed their opponents and prioritised rating bands with lower coverage. This favours active players and games that already have engine analysis. The archived file contains 953,174 rows and 11,833 distinct Lichess game IDs. Repeated observations and moves without usable labels account for some of the difference between the archive and the analysis samples.
 
-| File | Description |
-|------|-------------|
-| `moves.csv.gz` | Main dataset (gzip-compressed, one row = one move). Read directly with `pd.read_csv('moves.csv.gz')`. |
-| `fetch_games.py` | Script that pulls games from the Lichess API (reproducible). |
-| `build_from_api.py` | Script that extracts features and labels from the fetched game JSON (reproducible). |
-| `README_data.md` | This document. |
+| File | Purpose |
+| --- | --- |
+| `data/moves.csv.gz` | Original uploaded table, preserved for comparison. |
+| `data/raw/recovered/batch_*.ndjson.gz` | Locally cached official game exports containing the clock settings, full moves, PGN clock annotations and engine evaluations. |
+| `data/processed/moves_verified.csv.gz` | Rebuilt table used for the revised analysis. |
+| `data/processed/recovery_counts.json` | Counts by official time control, inclusion/exclusion reason, games, moves and label availability. |
+| `data/processed/clock_audit.json` | Coverage of the legacy game IDs, per-ply comparisons of two JSON indexing conventions against official PGN clocks, and the corresponding audit of the legacy opponent-clock column. |
 
-## 0. Sample Size (actual)
+The eight-character IDs in the archive identify the actual public games. The recovery script sends those IDs to the official bulk export API and caches each completed batch locally. The sampler retains games explicitly marked rated, standard, initial time 180 seconds and increment 0, with a UTC start date in September 2026, two ratings, valid moves, engine evaluations and aligned clocks. The API's broader blitz classification alone allows multiple time controls. The local cache retains the source of every accepted row. [Lichess documentation for exports by ID](https://github.com/lichess-org/api/blob/master/doc/specs/tags/games/api-games-export-_ids.yaml)
 
-- Fetched: **150 players**, **12,131 games** (2026-09, rated blitz 180+0, with engine analysis + clocks).
-- Unit of analysis: **953,174 moves**, of which 939,039 (98.5%) are labeled.
-- Label distribution: `y=1` (blunder) 78,805 moves, **8.29%**.
-- Rating bands (by move count): 2500+ 38.7% / 2200–2499 27.0% / 1900–2199 9.6% / 1600–1899 12.4% / <1600 12.3%. The sample skews toward active strong players (they play far more games per month), but the mid/low bands still hold ~320k moves in absolute terms.
+### Recovered analysis sample, 20 November 2026
 
----
+All 11,833 requested game IDs were returned. In the full archive, 11,302 games had official time control 180+0. The other settings were 300+0 (281), 180+2 (209), 300+3 (40) and 180+1 (1). Sequential eligibility checks removed 37 games played from a supplied starting position, then 520 other-time-control games, then 23 games whose clock gains exceeded the tolerance below. Eleven of the 37 supplied-position games also had a different time control. The largest excluded clock increase was 535.28 seconds. [Recovery counts](processed/recovery_counts.json)
 
-## 1. Data Source
+| Primary analysis | Games | Moves with finite scores | Serious errors |
+| --- | ---: | ---: | ---: |
+| Development, 1–23 September | 8,621 | 642,668 | 53,398 |
+| Reused chronological test week, 24–30 September | 2,632 | 196,508 | 16,401 |
+| Total | 11,253 | 839,176 | 69,799 |
 
-- **Source**: Lichess public API (`lichess.org/api`), September 2026 rated blitz games.
-- **Raw scale**: Lichess's full September standard-game archive is ~29.2 GB (~89.6M games). This project **does not download the full archive**; it pulls a small, condition-filtered subset via the API instead.
-- **License**: CC0 (public domain).
-- **Endpoint**: `GET /api/games/user/{username}` with `perfType=blitz`, `rated=true`, `analysed=true`, `clocks=true`, `evals=true`, and `since`/`until` locking the range to 2026-09.
+The rebuilt table retains 888,993 turns, including moves with incomplete or mate-valued evaluations. The alternative label with mate endpoints is available on 875,889 turns. The primary sample includes 6,823 distinct player identifiers, with both players known in every game.
 
-> Why the API instead of the 29.2 GB archive: the Lichess monthly archive throttles a single HTTP connection (~1 MB/s), returns HTTP 429 for multi-threaded downloads, and its torrent is cold (few seeders), so downloading 29.2 GB is impractical. The API pulls exactly the filtered subset we need, orders of magnitude smaller.
+## Turn-start information
 
-## 2. Filtering & Sampling (Scope)
+For each game, the exporter compares the JSON clock in centiseconds at index `i` with the rounded PGN clock shown after move `i`. It requires an agreement within half a second on every ply. Certain exports have an additional terminal clock entry, which lies outside the recorded moves. Before a player's first turn their clock starts at 180 seconds. Afterwards the player's most recent completed move supplies their starting clock. The opponent's clock comes from the opponent's most recent completed turn.
 
-From the API response, only games meeting all of the following are kept:
+For each side the first recorded clock is compared with the 180-second start and subsequent clocks with that side's previous clock. If any official centisecond value increases by more than 1 second, the whole game is excluded from the time-use analysis. An increase could reflect extra time or a clock correction, and ordinary elapsed time cannot be recovered for that interval. The 1-second tolerance was chosen during the data audit before fitting the revised models. The original proposal specified checking invalid clock histories and left the numerical threshold open.
 
-1. Time control **180+0** (3 minutes per side, no increment) — coarse-filtered with `perfType=blitz`, then confirmed via the clock array.
-2. Both players' ratings are numeric and present.
-3. **Engine analysis present** (`analysed=true`; returns an `analysis` array with a per-move `eval`).
-4. **Clocks present** (`clocks=true`; returns a per-move `clocks` array).
+After a move, estimated elapsed time is the difference between that player's starting clock and the verified clock after their move, floored at zero for small recording fluctuations. Separate histories for White and Black supply the player's previous time and the mean of their last three completed turns. On each player's first turn these fields are missing. Historical time fields are updated after the current row is constructed.
 
-**Sampling method (snowball + band-aware priority)**:
+The earlier extraction code used clock index `i+1` after move `i`. In every one of the 913,510 labelled archive moves, the stored opponent clock equalled the mover's clock after that move. It also kept one shared time history for both sides. Both problems are fixed when reconstructing from the game exports.
 
-- Seed: Lichess blitz leaderboard top-100 (covers the high 2600+ band).
-- Expansion: for every player fetched, their **opponents** (with ratings) from the returned games are added to the queue, so the player pool naturally spreads across rating bands.
-- Band-aware priority: when fetching, players from **under-represented bands** are preferred, so we don't sample only strong players.
-- Band definitions: casual (<1600) / intermediate (1600–1899) / advanced (1900–2199) / expert (2200–2499) / master (2500+).
+The official JSON at index `i` agreed with its PGN annotation to within half a second on all 926,332 plies for which both index conventions could be compared. Index `i+1` met that tolerance on 52,856 plies. In all 913,510 labeled legacy rows, the archived opponent-clock field equalled the current mover's clock **after** the move. This made future information available during the original evaluation. [Full clock audit](processed/clock_audit.json)
 
-**Important limitation (must be acknowledged)**: this is a **snowball, band-stratified sample of active players** — **not** the site-wide random reservoir sampling envisioned in the original proposal. The sample skews toward **active players who played blitz in September and whose games were engine-analysed**, which may differ from the site-wide rating distribution. Generalisability of the conclusions must be worded cautiously.
+## Fields
 
-## 3. Unit of Analysis
+| Fields | Meaning |
+| --- | --- |
+| `game_id`, `date`, `ply`, `fullmove`, `mover_is_white` | Original game ID, UTC starting date, zero-based half-move index, full-move number and moving colour. |
+| `white_player_id`, `black_player_id` | Stable 24-hex-character prefixes of SHA-256 over the public lower-case player identifiers, for checking repeated players without putting player names in the model table. |
+| `clk_mover`, `clk_opponent` | Seconds remaining for the mover and their opponent at turn start. |
+| `mover_rating`, `opp_rating`, `rating_diff` | Both players' ratings and the mover's rating minus the opponent's rating. |
+| `prev_think_time`, `think_time_mean3` | Seconds spent on the mover's most recent completed turn and mean over their last 1–3 completed turns. |
+| `material_adv_cp`, `nonpawn_material` | Material advantage from the mover's perspective in centipawns and total non-pawn material in pawn units. Piece values are 1/3/3/5/9. |
+| `legal_moves`, `in_check`, `phase` | Legal-move count, check status and game phase on the pre-move board. Opening is full moves 1–10, then endgame for ≤14 non-pawn points and middlegame otherwise. |
+| `pre_move_eval_cp`, `post_move_eval_cp` | Finite pre-/post-move engine scores from the current mover's perspective. Missing for mates or absent annotations. |
+| `pre_move_mate`, `post_move_mate` | Signed mate distance from the mover's perspective, when the engine returns a mate score. For distance zero, the resulting board determines which side is checkmated. |
+| `pre_move_win_pct`, `post_move_win_pct` | The mover's winning-chance proxy, or 0/100 for a forced loss/win. Missing when the engine score is unavailable. |
+| `y`, `y_mate_inclusive` | Binary study labels. The main label requires finite engine scores before and after the move. The sensitivity label also permits forced loss/win. Either label is missing if a required score is absent. |
 
-**One row = one move**, nested within a game and a player.
+The win proxy is `100 / (1 + exp(-0.00368208 × cp))`. A fall of at least 10 percentage points from pre-move to post-move counts as a serious error under the main definition. Both scores are from the same player's perspective. A forced mate never becomes an arbitrary finite centipawn value. Post-move fields, the mate-inclusive fields and player identifiers serve labeling or audit purposes only. Training features must be explicitly selected from eligible turn-start columns.
 
-- Each game contributes multiple rows (one per move).
-- The same player appears on multiple rows (multiple moves) within a game.
+## Reproduction
 
-## 4. Label Definition (y)
+Run the following from the repository root in the project Python environment.
 
-- **Prediction timing**: *before* the move is played (i.e., at the moment it is the mover's turn).
-- **Label**: `y = 1` means "blunder"; `y = 0` means non-blunder; `NULL` means undecidable (missing before/after evaluation).
-- **Rule**: convert the engine evaluation (centipawns) from White's perspective to the **current mover's perspective**, then map it to a win probability via
+```console
+python data/refetch_sample.py
+python data/build_from_api.py --input data/raw/recovered --output data/processed/moves_verified.csv.gz --audit data/processed/recovery_counts.json
+python data/audit_clocks.py
+python -m unittest data.test_build_from_api
+```
 
-  ```
-  W(c) = 100 / (1 + exp(-0.00368208 · c))
-  ```
-
-  If the move causes the win probability to drop by **≥ 10 percentage points**, then `y = 1`.
-
-- **Note**: this is a project-defined "serious error" threshold (per the proposal), **not** Lichess's official blunder label. Using a relative drop in win probability rather than a fixed "lost a pawn" avoids distortion in already-decided positions.
-- **Mate evaluations**: `[%eval #N]` is mapped to a ±2000 cp proxy before computing the win probability.
-- **Missing values**: when a move lacks a before or after evaluation, `y` is set to `NULL`. These rows are **kept** (for inspection) but must be filtered out before modelling.
-
-## 5. Data Dictionary
-
-| Field | Type | Meaning | Range / Notes |
-|-------|------|---------|---------------|
-| `game_id` | str | Unique game identifier (first 12 chars of MD5) | Used for grouping by game |
-| `date` | str | Game UTC date | `YYYY-MM-DD`, used for temporal splits |
-| `fullmove` | int | Full-move number (turn count) | Starts at 1 |
-| `ply` | int | Half-move index | Starts at 0; even = White, odd = Black |
-| `mover_is_white` | int | Whether the mover is White | 0/1 |
-| `clk_mover` | float | **Mover's** remaining time (seconds) at the start of this move | 180 on the first move |
-| `clk_opponent` | float | **Opponent's** remaining time (seconds) at the start of this move | 180 on the first move |
-| `mover_rating` | int | Mover's rating | |
-| `opp_rating` | int | Opponent's rating | |
-| `rating_diff` | int | Rating difference (mover − opponent) | |
-| `prev_think_time` | float | The mover's own think time on the previous move (seconds) | NULL on first move |
-| `think_time_mean3` | float | Mean of the mover's own think time over the last 3 moves (seconds) | Fewer than 3 moves → average over available |
-| `material_adv_cp` | int | Material advantage (centipawns, mover's perspective) | pawn=100, knight/bishop=300, rook=500, queen=900 |
-| `nonpawn_material` | int | Total non-pawn material of both sides | N/B=3, R=5, Q=9 (king excluded) |
-| `legal_moves` | int | Number of legal moves before the move | Rough position-complexity proxy |
-| `in_check` | int | Whether the mover is in check before the move | 0/1 |
-| `phase` | str | Game phase | `opening` / `middlegame` / `endgame` |
-| `pre_move_eval_cp` | float | Engine evaluation before the move (centipawns, mover's perspective) | NULL on the first move |
-| `y` | int | Label: whether it is a blunder | 0/1/NULL |
-
-### Phase Classification
-
-- `opening`: fullmove ≤ 10 (first 10 turns).
-- `endgame`: total non-pawn material of both sides ≤ 14.
-- Otherwise: `middlegame`.
-
-## 6. Key Notes for the Modelling Teammate
-
-1. **Do not shuffle-and-split naively.** Moves within the same game are not independent — cross-validation / splits **must group by `game_id`**, otherwise leakage occurs.
-2. **Temporal split** (per proposal): games from 2026-09-24 to 09-30 form the **held-out test set**; 09-01 to 09-23 are used for training/validation (3 expanding windows: train 1-8/1-13/1-18, validate 9-13/14-18/19-23).
-3. **Rows where `y` is NULL** must be filtered before modelling, but first check their proportion (may reveal a pattern in missing evaluations).
-4. **`prev_think_time`, `think_time_mean3`, `pre_move_eval_cp` contain NULLs** (first move / first few moves). Handle them during modelling (the proposal mentions history-missing indicator variables).
-5. **Standardisation/scaling, spline fitting, and hyperparameter tuning** must all be done within each training window, never across windows.
-6. Class imbalance: blunders are usually a minority class. The actual `y=1` proportion is reported; see Section 0.
-
-## 7. Reproducibility
-
-- Fetch: `python scripts/fetch_games.py --target-players 150 --out data/raw_games.ndjson` (snowball sampling, resumable; the `.seen` file records already-fetched players).
-- Feature extraction: `python scripts/build_from_api.py --input data/raw_games.ndjson --output output/moves.csv`.
-- Compression (the raw CSV exceeds GitHub's 100 MB limit, hence the gzip delivery): `gzip -c moves.csv > moves.csv.gz`.
-- The time range is locked to 2026-09 via `--since` / `--until` (millisecond timestamps).
-- Label threshold, win-probability function, and feature definitions live in the constants at the top of `build_from_api.py` and in Sections 4 and 5 of this document.
+The fetcher resumes completed batches. The clock audit compares the original IDs with all returned IDs. Public metadata and availability can change between retrievals. The local raw cache contains public account information and stays outside Git. The recovery counts contain SHA-256 checksums for the compressed output and the underlying CSV. The builder fixes row order, CSV line endings and gzip header metadata so a rebuild using the same export cache can be verified. For a new sample, `python data/fetch_games.py --out data/raw/new_sample.ndjson` runs the player-based crawler. This produces a different set of games as the live leaderboard changes. Pass the resulting NDJSON file to the same builder.

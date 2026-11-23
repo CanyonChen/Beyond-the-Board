@@ -1,0 +1,55 @@
+{
+  "data": {
+    "source": "moves_verified.csv.gz",
+    "sha256": "9faf8fd13a2196d4daad9491baa4c1fb735e0cc46a0de7793c206a87a41a554b",
+    "history": "provided",
+    "source_rows": 888993,
+    "identical_duplicates": 0,
+    "moves": 839176,
+    "games": 11253,
+    "positives": 69799,
+    "prevalence": 0.08317563896012278
+  },
+  "environment": {
+    "python": "3.13.12",
+    "numpy": "2.5.4",
+    "pandas": "3.1.1",
+    "sklearn": "1.9.1",
+    "joblib": "1.6.0",
+    "scipy": "1.18.1",
+    "xgboost": "3.4.1",
+    "thread_limit": 4
+  },
+  "checks": {
+    "labels_recomputed": 839176,
+    "rule_applicable": 45606,
+    "validation_mean_max_difference": 0.0,
+    "final_week_metric_max_difference": 0.0,
+    "calibration_max_difference": 0.0,
+    "paired_interval_max_difference": 0.0,
+    "subgroup_max_difference": 0.0,
+    "robustness_max_difference": 0.0,
+    "figure_source_hashes": {
+      "data/processed/clock_audit.json": "2f92854ab1c0eb2b11b8648d44ee1ee719a9929f134a999191fcda504ebca825",
+      "results/model_comparison/verified_180_0/paired_log_loss.csv": "6ab25f2273c634aa0d44be8cb6df486da0326bd4e25d9bded173cd1cf2e0dbdc",
+      "results/model_comparison/verified_180_0/validation_means.csv": "55283f8f473e5a4db58db8cb8df16189bbe7aede984d5e088bbf3780014f7d41",
+      "results/model_comparison/verified_180_0/published_test_metrics.csv": "80cb5cd4a312a9b41f23c0fc711f7026004178f0db9ede0e5941c7f11c69ca2d",
+      "results/model_comparison/clock_subgroups.csv": "62da03af0c86f884fd117e1d46719ffe47f6c21299737d0d207fbbe9d3813b87"
+    },
+    "validation_review": "Recomputed means and checked game separation; validation models were not refitted."
+  },
+  "interpretation": {
+    "relative_log_loss_reduction_pct": 0.4311817050023023,
+    "starting_clock_share_of_reduction_pct": 87.70054744108526,
+    "weighted_decile_calibration_gap_pp": 0.35278214549849407,
+    "largest_decile_calibration_gap_pp": 0.9114999538146623,
+    "highest_risk_decile_moves": 19651,
+    "highest_risk_decile_event_rate_pct": 28.87384865910132,
+    "disjoint_training_move_retention_pct": 5.249522303895635,
+    "disjoint_shared_players": 0,
+    "evaluation": "Reused September 24-30 period; no new independent test.",
+    "calibration": "Descriptive risk groups from the same evaluation period.",
+    "uncertainty": "Whole-game bootstrap; cross-game player dependence remains.",
+    "disjoint": "Training amount and player composition both change."
+  }
+}

@@ -1,0 +1,40 @@
+\refstepcounter{section}\label{app:numerical}
+\section*{Appendix \thesection. Numerical results behind the figures}
+\addcontentsline{toc}{section}{Appendix \thesection. Numerical results behind the figures}
+
+\subsection{Sample selection}
+Figure~\ref{fig:cohort} counts games through three sequential eligibility checks. The last row below switches to the move-level labelling criterion. A finite score is required on both sides of an observed move.
+
+\begin{table}[H]\centering
+\caption{Selection of the September 2026 analysis sample. Counts reflect sequential exclusions.}\label{tab:sample}
+\begin{tabular}{@{}ccc@{}}\toprule
+Selection step & Games remaining & Moves or labels \\\midrule
+Recovered from the original collection & 11,833 & --- \\
+Exclude 37 games with nonstandard starting positions & 11,796 & --- \\
+Exclude 520 remaining games with other time controls & 11,276 & --- \\
+Exclude 23 games with unexplained clock increases & \VerifiedGames & 888,993 moves \\
+Require finite engine scores before and after the move & \VerifiedGames & \VerifiedMoves{} labels \\\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Incremental value of time information}
+Each row adds predictors to the row above. Figure~\ref{fig:gains} shows reductions in log loss as positive values. The final column below reports the signed change (augmented model minus preceding model), so a negative change means an improvement.
+
+\begin{table}[H]\centering
+\caption{Incremental value of clock information in verified \(180+0\) games. The final column gives the change in log loss from the preceding row for 24--30 September, with a 95\% paired game-level bootstrap interval. Negative values indicate lower loss.}\label{tab:increments}
+\begin{tabular}{@{}cccc@{}}\toprule
+Inputs & Validation log loss & Final-week log loss & Change [95\% interval] \\\midrule
+\IncrementRows
+\bottomrule\end{tabular}
+\end{table}
+
+\subsection{Model comparison and probability metrics}
+Figure~\ref{fig:models} compares the constant baseline and the three model families with the zero-risk rule applied to the trained models. The table also gives their unconstrained counterparts. Lower log loss and Brier scores indicate better probability forecasts. Higher ROC AUC and average precision (AP) indicate better discrimination.
+ 
+\begin{table}[H]\centering
+\caption{Predictive performance on verified \(180+0\) games. Validation log loss is the mean across three development windows. The remaining metrics cover 24--30 September. Bold indicates the model selected by validation log loss.}\label{tab:revised}
+\begin{tabular}{@{}cccccc@{}}\toprule
+Model & \shortstack{Validation\\log loss} & \shortstack{Final-week\\log loss} & Brier score & ROC AUC & AP \\\midrule
+\PerformanceRows
+\bottomrule\end{tabular}
+\end{table}

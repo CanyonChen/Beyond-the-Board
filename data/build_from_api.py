@@ -1,241 +1,255 @@
-#!/usr/bin/env python3
-"""
-build_from_api.py — DSC5001 Group SixSixGoSmooth
-
-Turn the raw games (NDJSON from fetch_games.py, one Lichess API game object per
-line) into the move-level dataset `moves.csv`.
-
-Reuses the already-validated label & feature helpers from build_dataset.py
-(winning_chance, phase_of, nonpawn_material_total, side_material_cp) so the
-two pipelines produce identical semantics.
-
-Alignment (verified against the API):
-    moves[i]     = UCI move for ply i (0-indexed)
-    clocks[i+1]  = mover's clock (centiseconds) AFTER ply i; clocks[0] is the
-                   initial 18003 cs (= 3 min).  Note: we convert to seconds.
-    analysis[i]  = engine eval AFTER ply i, White perspective, {"eval": cp}
-                   or {"mate": n} (n>0 = White mates).
-
-Label (proposal, page 2):
-    y = 1 if the mover's winning-chance W(c) drops by >= 10 pp across the move,
-        else 0.  W(c) = 100 / (1 + exp(-0.00368208 c)).
-
-Usage
------
-    python scripts/build_from_api.py --input data/raw_games.ndjson \
-        --output output/moves.csv
-"""
+"""Rebuild the September 2026 standard 180+0 sample from official Lichess game exports."""
 
 import argparse
 import csv
+import gzip
+import hashlib
+import io
 import json
 import math
-import sys
+import re
+from collections import Counter, deque
+from contextlib import contextmanager
+from datetime import datetime, timezone
+from pathlib import Path
 
 import chess
 
-# Import the shared, already-validated helpers from build_dataset.
-sys.path.insert(0, "scripts")
-import build_dataset as bd
+
+FIELDS = ('game_id date fullmove ply mover_is_white clk_mover clk_opponent mover_rating '
+          'opp_rating rating_diff prev_think_time think_time_mean3 material_adv_cp '
+          'nonpawn_material legal_moves in_check phase pre_move_eval_cp post_move_eval_cp '
+          'pre_move_mate post_move_mate pre_move_win_pct post_move_win_pct '
+          'white_player_id black_player_id y y_mate_inclusive').split()
+PIECE_POINTS = {chess.PAWN: 1, chess.KNIGHT: 3, chess.BISHOP: 3, chess.ROOK: 5, chess.QUEEN: 9}
+CLOCK_TAG = re.compile(r'\[%clk (\d+):(\d+):([\d.]+)\]')
+MISSING = (None, None, None)
 
 
-MATE_CP = bd.MATE_CP
-BLUNDER_THRESHOLD = bd.BLUNDER_THRESHOLD
-TC_BASE_SECONDS = bd.TC_BASE_SECONDS
+def win_percent(cp):
+    # An equivalent logistic form that cannot overflow at very negative scores.
+    exp = math.exp(-abs(cp) * 0.00368208)
+    return 100 * ((1 if cp >= 0 else exp) / (1 + exp))
 
-FEATURE_COLUMNS = bd.FEATURE_COLUMNS  # reuse the same column order
+
+def white_score(entry, board_after):
+    """Return (finite centipawns, signed mate distance, win proxy) for White."""
+    if 'eval' in entry and entry['eval'] is not None:
+        cp = float(entry['eval'])
+        return (cp, None, win_percent(cp)) if math.isfinite(cp) else MISSING
+    if 'mate' in entry and entry['mate'] is not None:
+        n = int(entry['mate'])
+        if n == 0 and not board_after.is_checkmate():
+            return MISSING
+        white_wins = n > 0 if n else board_after.turn == chess.BLACK
+        return None, n, 100.0 if white_wins else 0.0
+    return MISSING
 
 
-def eval_to_white_cp(analysis_entry):
-    """analysis_entry -> White-perspective centipawns, or None.
+def for_mover(score, white):
+    if white:
+        return score
+    cp, mate, pct = score
+    return (-cp if cp is not None else None, -mate if mate is not None else None,
+            100 - pct if pct is not None else None)
 
-    Handles {"eval": <cp>} and {"mate": <n>} (n>0 = White mates).
-    """
-    if not analysis_entry:
-        return None
-    if "eval" in analysis_entry:
-        return float(analysis_entry["eval"])
-    if "mate" in analysis_entry:
-        n = int(analysis_entry["mate"])
-        return MATE_CP if n > 0 else -MATE_CP
+
+def player_key(player):
+    user = player.get('user') or {}
+    name = user.get('id') or user.get('name')
+    return hashlib.sha256(name.lower().encode()).hexdigest()[:24] if name else None
+
+
+def exclusion(game):
+    if game.get('rated') is not True or game.get('variant') != 'standard':
+        return 'not_rated_standard'
+    clock = game.get('clock') or {}
+    if clock.get('initial') != 180 or clock.get('increment') != 0:
+        return 'time_control_other_or_missing'
+    if not game.get('createdAt'):
+        return 'missing_date'
+    date = datetime.fromtimestamp(game['createdAt'] / 1000, timezone.utc).date().isoformat()
+    if not ('2026-09-01' <= date <= '2026-09-30'):
+        return 'outside_september_2026'
+    players = game.get('players') or {}
+    if not all(isinstance((players.get(side) or {}).get('rating'), (int, float))
+               for side in ('white', 'black')):
+        return 'missing_rating'
+    if not game.get('analysis'):
+        return 'no_engine_analysis'
     return None
 
 
-def game_to_rows(game):
-    """One Lichess API game object -> list of move-level feature dicts."""
-    moves = game.get("moves", "").split()
-    clocks = game.get("clocks", [])   # centiseconds
-    analysis = game.get("analysis", [])
+def aligned_clocks(clocks, pgn, n):
+    """Compare the centisecond JSON series with official per-ply PGN clock tags."""
+    if len(clocks) not in (n, n + 1) or n == 0:
+        return None
+    tags = [3600 * int(h) + 60 * int(m) + float(s) for h, m, s in CLOCK_TAG.findall(pgn)]
+    if len(tags) != n:
+        return None
+    seconds = [c / 100.0 for c in clocks[:n] if isinstance(c, (int, float)) and c >= 0]
+    if len(seconds) != n or any(abs(a - b) > 0.500001 for a, b in zip(seconds, tags)):
+        return None
+    return seconds
 
-    # Ratings.
-    wp = game.get("players", {}).get("white", {})
-    bp = game.get("players", {}).get("black", {})
-    white_rating = wp.get("rating")
-    black_rating = bp.get("rating")
-    if white_rating is None or black_rating is None:
-        return []
 
-    # Date from createdAt (ms) -> YYYY-MM-DD.
-    created = game.get("createdAt")
-    if created:
-        from datetime import datetime, timezone
-        dt = datetime.fromtimestamp(created / 1000, tz=timezone.utc)
-        game_date = dt.strftime("%Y-%m-%d")
-    else:
-        game_date = ""
+def max_clock_gain(game):
+    """Largest same-side clock increase in seconds, including each side's first turn."""
+    series = (game.get('clocks') or [])[:len(game.get('moves', '').split())]
+    initial = (game.get('clock') or {}).get('initial')
+    if not isinstance(initial, (float, int)):
+        return 0.0
+    last = [100 * initial, 100 * initial]
+    gain = 0.0
+    for ply, centiseconds in enumerate(series):
+        if not isinstance(centiseconds, (float, int)):
+            continue
+        color = ply % 2
+        gain = max(gain, centiseconds - last[color])
+        last[color] = centiseconds
+    return gain / 100
 
-    game_id = game.get("id", "")
 
+def extract(game):
+    reason = exclusion(game)
+    if reason:
+        return [], reason
+    moves = game.get('moves', '').split()
+    seconds = aligned_clocks(game.get('clocks') or [], game.get('pgn') or '', len(moves))
+    if seconds is None:
+        return [], 'missing_or_unaligned_clocks'
+    if max_clock_gain(game) > 1.0:
+        return [], 'clock_gain_above_tolerance'
+    players = game['players']
+    date = datetime.fromtimestamp(game['createdAt'] / 1000, timezone.utc).date().isoformat()
+    ratings = [players['black']['rating'], players['white']['rating']]
+    keys = {f'{side}_player_id': player_key(players[side]) for side in ('white', 'black')}
     board = chess.Board()
+    clocks = {chess.WHITE: 180.0, chess.BLACK: 180.0}
+    history = {chess.WHITE: deque(maxlen=3), chess.BLACK: deque(maxlen=3)}
+    previous = MISSING
+    analysis = game['analysis']
     rows = []
-
-    # Per-side last clock (seconds) after their most recent move; None if unknown.
-    last_clk = {"white": None, "black": None}
-    # Think history: (mover_is_white, seconds) for completed earlier turns.
-    think_history = []
-    # Eval AFTER previous move, White perspective (cp).
-    prev_eval_white = None
-
-    n = len(moves)
-    for i in range(n):
-        mover_is_white = (i % 2 == 0)
-        move_uci = moves[i]
-
-        # Clock after this move (belongs to mover). clocks has n+1 entries.
-        clk_after = clocks[i + 1] / 100.0 if i + 1 < len(clocks) else None
-
-        # Eval after this move (White perspective).
-        eval_after_white = eval_to_white_cp(analysis[i]) if i < len(analysis) else None
-
-        # Mover's starting clock = clock after their previous move (i-2), else 180.
-        mover_side = "white" if mover_is_white else "black"
-        if i < 2:
-            mover_start_clk = TC_BASE_SECONDS
-        else:
-            mover_start_clk = last_clk.get(mover_side)
-
-        # Opponent's starting clock = clock after the immediately preceding ply.
-        opp_side = "black" if mover_is_white else "white"
-        opp_start_clk = last_clk.get(opp_side) if i >= 1 else TC_BASE_SECONDS
-
-        # Eval before this move = previous move's after-eval (White view).
-        eval_before_white = prev_eval_white
-
-        # Convert to mover perspective.
-        eval_before_mover = (
-            eval_before_white if mover_is_white else -eval_before_white
-        ) if eval_before_white is not None else None
-        eval_after_mover = (
-            eval_after_white if mover_is_white else -eval_after_white
-        ) if eval_after_white is not None else None
-
-        # Label.
-        y = None
-        if eval_before_mover is not None and eval_after_mover is not None:
-            drop = bd.winning_chance(eval_before_mover) - bd.winning_chance(eval_after_mover)
-            y = 1 if drop >= BLUNDER_THRESHOLD else 0
-
-        # Ratings.
-        mover_rating = white_rating if mover_is_white else black_rating
-        opp_rating = black_rating if mover_is_white else white_rating
-
-        # Position descriptors BEFORE the move.
-        legal_moves = board.legal_moves.count()
-        in_check = int(board.is_check())
-        nonpawn_mat = bd.nonpawn_material_total(board)
-        material_adv_cp = (
-            bd.side_material_cp(board, mover_is_white)
-            - bd.side_material_cp(board, not mover_is_white)
-        )
-        phase = bd.phase_of(board, board.fullmove_number)
-
-        # Time-usage history.
-        prev_think_time = think_history[-1][1] if think_history else None
-        recent = [t for _, t in think_history[-3:] if t is not None]
-        think_time_mean3 = (sum(recent) / len(recent)) if recent else None
-
-        row = {
-            "game_id": game_id,
-            "date": game_date,
-            "fullmove": board.fullmove_number,
-            "ply": i,
-            "mover_is_white": int(mover_is_white),
-            "clk_mover": mover_start_clk,
-            "clk_opponent": opp_start_clk,
-            "mover_rating": mover_rating,
-            "opp_rating": opp_rating,
-            "rating_diff": mover_rating - opp_rating,
-            "prev_think_time": prev_think_time,
-            "think_time_mean3": think_time_mean3,
-            "material_adv_cp": material_adv_cp,
-            "nonpawn_material": nonpawn_mat,
-            "legal_moves": legal_moves,
-            "in_check": in_check,
-            "phase": phase,
-            "pre_move_eval_cp": eval_before_mover,
-            "y": y,
-        }
-        rows.append(row)
-
-        # Advance state.
-        if clk_after is not None:
-            last_clk[mover_side] = clk_after
-        if mover_start_clk is not None and clk_after is not None:
-            think = max(0.0, mover_start_clk - clk_after)
-            think_history.append((mover_is_white, think))
-        else:
-            think_history.append((mover_is_white, None))
-
-        prev_eval_white = eval_after_white
-
-        # Push move. Lichess API returns SAN-ish moves (e.g. "d4", "Nf3",
-        # "O-O", "exd5"), not UCI, so use parse_san. Skip game on illegal move.
+    for ply, san in enumerate(moves):
+        white = board.turn
+        own_history = history[white]
+        start = clocks[white]
+        material = {color: sum(value * chess.popcount(board.pieces_mask(piece, color))
+                               for piece, value in PIECE_POINTS.items())
+                    for color in (chess.WHITE, chess.BLACK)}
+        nonpawn = sum(material.values()) - chess.popcount(board.pawns)
+        phase = 'opening' if board.fullmove_number <= 10 else ('endgame' if nonpawn <= 14 else 'middlegame')
+        row = dict(game_id=game['id'], date=date, fullmove=board.fullmove_number, ply=ply,
+                   mover_is_white=int(white), clk_mover=start, clk_opponent=clocks[not white],
+                   mover_rating=ratings[white], opp_rating=ratings[not white],
+                   rating_diff=ratings[white] - ratings[not white],
+                   prev_think_time=own_history[-1] if own_history else None,
+                   think_time_mean3=sum(own_history) / len(own_history) if own_history else None,
+                   material_adv_cp=100 * (material[white] - material[not white]),
+                   nonpawn_material=nonpawn, legal_moves=board.legal_moves.count(),
+                   in_check=int(board.is_check()), phase=phase, **keys)
         try:
-            board.push_san(move_uci)
-        except (ValueError, chess.IllegalMoveError, chess.InvalidMoveError):
-            break
+            board.push_san(san)
+        except ValueError:
+            return [], 'invalid_move_sequence'
+        after = white_score(analysis[ply] or {}, board) if ply < len(analysis) else MISSING
+        cp0, mate0, w0 = for_mover(previous, white)
+        cp1, mate1, w1 = for_mover(after, white)
+        inclusive = int(w0 - w1 >= 10) if w0 is not None and w1 is not None else None
+        row.update(pre_move_eval_cp=cp0, post_move_eval_cp=cp1, pre_move_mate=mate0,
+                   post_move_mate=mate1, pre_move_win_pct=w0, post_move_win_pct=w1,
+                   y=inclusive if cp0 is not None and cp1 is not None else None,
+                   y_mate_inclusive=inclusive)
+        rows.append(row)
+        previous = after
+        own_history.append(max(0.0, start - seconds[ply]))
+        clocks[white] = seconds[ply]
+    if not any(row['y_mate_inclusive'] is not None for row in rows):
+        return [], 'no_comparable_engine_scores'
+    return rows, None
 
-    return rows
+
+@contextmanager
+def open_text(path, mode):
+    if mode == 'w' and path.suffix == '.gz':
+        with (path.open('wb') as raw,
+              gzip.GzipFile(filename='', mode='wb', fileobj=raw, mtime=0) as gz,
+              io.TextIOWrapper(gz, encoding='utf-8', newline='') as text):
+            yield text
+        return
+    opener = gzip.open if path.suffix == '.gz' else open
+    with opener(path, mode + 't', encoding='utf-8', newline='') as text:
+        yield text
+
+
+def build(sources, output):
+    stats = Counter()
+    controls = Counter()
+    seen = set()
+    largest_gain = 0.0
+    output.parent.mkdir(parents=True, exist_ok=True)
+    tmp = output.with_name('.partial-' + output.name)
+    with open_text(tmp, 'w') as handle:
+        writer = csv.DictWriter(handle, fieldnames=FIELDS, lineterminator='\n')
+        writer.writeheader()
+        for source in sources:
+            with open_text(source, 'r') as stream:
+                games = (json.loads(line) for line in stream if line.strip())
+                if source.name.startswith('batch_'):
+                    games = sorted(games, key=lambda g: g['id'])
+                for game in games:
+                    game_id = game['id']
+                    if game_id in seen:
+                        stats['duplicate_game_records'] += 1
+                        continue
+                    seen.add(game_id)
+                    clock = game.get('clock') or {}
+                    controls[f"{clock.get('initial')}+{clock.get('increment')}"] += 1
+                    rows, reason = extract(game)
+                    if reason:
+                        stats['excluded_' + reason] += 1
+                        if reason == 'clock_gain_above_tolerance':
+                            largest_gain = max(largest_gain, max_clock_gain(game))
+                        continue
+                    writer.writerows(rows)
+                    stats['included_games'] += 1
+                    stats['primary_labeled_games'] += any(r['y'] is not None for r in rows)
+                    stats['rows'] += len(rows)
+                    stats['primary_labeled_rows'] += sum(r['y'] is not None for r in rows)
+                    stats['mate_inclusive_labeled_rows'] += sum(r['y_mate_inclusive'] is not None for r in rows)
+    tmp.replace(output)
+    with output.open('rb') as source:
+        file_hash = hashlib.file_digest(source, 'sha256').hexdigest()
+    opener = gzip.open if output.suffix == '.gz' else open
+    with opener(output, 'rb') as source:
+        csv_hash = hashlib.file_digest(source, 'sha256').hexdigest()
+    return {'unique_source_games': len(seen), 'time_controls': dict(controls),
+            'clock_gain_tolerance_seconds': 1.0, 'largest_excluded_clock_gain_seconds': largest_gain,
+            'output_file_sha256': file_hash, 'decompressed_csv_sha256': csv_hash, **stats}
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--input", required=True, help="NDJSON raw games file")
-    ap.add_argument("--output", required=True, help="output CSV path")
-    args = ap.parse_args()
-
-    all_rows = []
-    n_games = 0
-    n_skipped = 0
-
-    with open(args.input) as fh:
-        for line in fh:
-            line = line.strip()
-            if not line:
-                continue
-            game = json.loads(line)
-            rows = game_to_rows(game)
-            if not rows:
-                n_skipped += 1
-                continue
-            all_rows.extend(rows)
-            n_games += 1
-
-    with open(args.output, "w", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=FEATURE_COLUMNS)
-        writer.writeheader()
-        writer.writerows(all_rows)
-
-    # Summary.
-    n_labeled = sum(1 for r in all_rows if r["y"] is not None)
-    n_blunders = sum(1 for r in all_rows if r["y"] == 1)
-    print(f"games: {n_games} (skipped {n_skipped})")
-    print(f"total moves: {len(all_rows)}")
-    print(f"labeled moves: {n_labeled} ({n_labeled/len(all_rows)*100:.1f}%)")
-    if n_labeled:
-        print(f"blunders (y=1): {n_blunders} ({n_blunders/n_labeled*100:.2f}% of labeled)")
-    print(f"output: {args.output}")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--input', type=Path, required=True, help='NDJSON(.gz) file or recovered batches directory')
+    parser.add_argument('--output', type=Path, default=Path('data/processed/moves_verified.csv.gz'))
+    parser.add_argument('--audit', type=Path, help='Write aggregate sampling and exclusion counts as JSON')
+    args = parser.parse_args()
+    if args.input.is_dir():
+        manifest = args.input / 'manifest.json'
+        if not manifest.is_file():
+            parser.error('The recovered directory lacks a completed fetch manifest. Finish refetch_sample.py first.')
+        files = [args.input / name for name in json.loads(manifest.read_text())['batch_files']]
+    else:
+        files = [args.input]
+    if not files:
+        parser.error('No completed source batch files were found')
+    stats = build(files, args.output)
+    summary = json.dumps(stats, indent=2, sort_keys=True) + '\n'
+    print(summary, end='')
+    if args.audit:
+        args.audit.parent.mkdir(parents=True, exist_ok=True)
+        args.audit.write_text(summary, encoding='utf-8')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

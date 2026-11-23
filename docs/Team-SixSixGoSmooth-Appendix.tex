@@ -1,0 +1,71 @@
+% Run pdfLaTeX from this directory with the source archive at \sourcearchive.
+% The archive is an ordinary PDF attachment, extractable from the Attachments panel.
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,tgheros}
+\usepackage[top=16mm,bottom=16mm,left=20mm,right=20mm]{geometry}
+\usepackage{microtype,tabularx,array,xcolor}
+\usepackage[colorlinks=true]{hyperref}
+\definecolor{wine}{HTML}{9B134D}
+\definecolor{ink}{HTML}{202124}
+\definecolor{muted}{HTML}{545B60}
+\definecolor{rulegray}{HTML}{D4D6D7}
+\hypersetup{urlcolor=wine,linkcolor=wine,pdftitle={Beyond the Board: Team Contributions and Source Code},pdfauthor={SixSixGoSmooth},pdfsubject={DSC5001 group project appendix}}
+\providecommand{\sourcearchive}{appendix-assets/Beyond-the-Board-source.zip}
+\newcommand{\commit}[2]{\href{https://github.com/CanyonChen/Beyond-the-Board/commit/#1}{#2}}
+\newcommand{\sectionhead}[1]{\par\addvspace{19pt}{\bfseries\fontsize{15}{18}\selectfont #1\par}\vspace{7pt}}
+\newcommand{\researchtitle}{Beyond the Board: What the Clock Adds to Blunder Prediction in Blitz Chess}
+\setlength{\parindent}{0pt}
+\setlength{\tabcolsep}{0pt}
+\newcolumntype{P}{>{\raggedright\arraybackslash\bfseries}p{32mm}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\urlstyle{same}
+
+\begin{document}
+\pagestyle{empty}
+\sffamily\color{ink}
+{\color{wine}\bfseries\small DSC5001\enspace$\cdot$\enspace Statistical Machine Learning I\hfill SixSixGoSmooth\par}
+\vspace{6pt}{\color{wine}\rule{\linewidth}{1pt}}\par
+\vspace{10pt}
+{\fontsize{25}{28}\selectfont\bfseries Team contributions and source code\par}
+\vspace{4pt}{\color{muted}\fontsize{12}{15}\selectfont\researchtitle\par}
+
+\sectionhead{Documented contributions}
+\begin{tabularx}{\linewidth}{@{}P@{\hspace{4mm}}Y@{}}
+CHEN Canyang\newline{\mdseries\small 60775208} &
+Set up the repository, archived the proposal and roster, and established the project progress log.
+\commit{b4448e68f8426f5328feb3310f4bba4d840ef17c}{Project setup} $\cdot$ \commit{8b9397dfcb8ecd91bf672f0a81331c76927a7766}{Progress log}\\\noalign{\vskip 9pt}
+CHEN Siying\newline{\mdseries\small 61104552} &
+Refined the modelling approach, integrated the project materials, and coordinated the report and slides.\par
+\href{https://github.com/CanyonChen/Beyond-the-Board/blob/main/docs/report/Beyond_the_Board_Report.pdf}{Report} $\cdot$ \href{https://github.com/CanyonChen/Beyond-the-Board/blob/main/docs/pre/Team-SixSixGoSmooth-PPT.pdf}{Slides}\\\noalign{\vskip 9pt}
+GUAN Wenxi\newline{\mdseries\small 60237406} &
+Collected Lichess games through the API, preprocessed the original move data, and supplied the extraction scripts, move table and data guide.
+\commit{f2c681e0be8c2489ec55fbb363ac6953f71e8f86}{Data delivery} $\cdot$ \commit{87aa01f8eacefd3a4e21599ab0fe9219db3b72ba}{Collection record}\\\noalign{\vskip 9pt}
+LIU Yibo\newline{\mdseries\small 60504525} &
+Built the experimental workflow and ran model training and testing.\par
+\href{https://github.com/CanyonChen/Beyond-the-Board/blob/main/experiment/evaluation.md}{Evaluation protocol} $\cdot$ \href{https://github.com/CanyonChen/Beyond-the-Board/blob/main/experiment/results.md}{Experiment results}\\\noalign{\vskip 9pt}
+SHI Geyunqing\newline{\mdseries\small 61028298} &
+Implemented the prevalence baseline, logistic regression and gradient boosting. Wrote the original methods and slide outline, and committed the benchmark results and figures.
+\commit{f430a045a849deae184541d6762851490f2a511e}{Models and methods} $\cdot$ \commit{eede3daec7dd6b3fc659e7c7e7e3de32b95748a9}{Evaluation outputs}\\\noalign{\vskip 9pt}
+WU Senyuan\newline{\mdseries\small 60231487} &
+Reproduced the final-week evaluation, time-feature comparisons, calibration and sensitivity checks. Reviewed figures, refined the experimental conclusions, wrote the complete English presentation script, and prepared the presentation of experimental findings.\par
+\href{https://github.com/CanyonChen/Beyond-the-Board/tree/main/results/model_comparison}{Evaluation data} $\cdot$ \href{https://github.com/CanyonChen/Beyond-the-Board/blob/main/docs/report/Beyond_the_Board_Report.pdf}{Experimental report}\\
+\end{tabularx}
+
+\sectionhead{Source code and current materials}
+\textbf{Group repository}\enspace\href{https://github.com/CanyonChen/Beyond-the-Board}{github.com/CanyonChen/Beyond-the-Board}\par
+\vspace{3pt}
+The \href{https://github.com/CanyonChen/Beyond-the-Board/tree/92dd2e7c60d5f3efc5950686f538bdd42e310a98}{archived revision \texttt{92dd2e7}} contains the original data pipeline and benchmarks.\par
+\vspace{3pt}
+The attached \texttt{Beyond-the-Board-source.zip} contains the analysis source, review program and results, current report, and complete English presentation script. Open the Attachments panel in a PDF reader to save it. The GitHub links above point to the published materials; the attachment includes an offline copy.
+
+% Register the ZIP in the standard EmbeddedFiles name tree. pdfLaTeX also
+% keeps hyperref's destination name tree and URI annotations.
+\immediate\pdfobj stream attr { /Type /EmbeddedFile } file {\sourcearchive}
+\edef\zipstream{\the\pdflastobj\space 0 R}
+\immediate\pdfobj{<< /Type /Filespec /F (Beyond-the-Board-source.zip) /UF (Beyond-the-Board-source.zip)
+  /Desc (Code used in the Beyond the Board analysis) /EF << /F \zipstream >> >>}
+\edef\zipspec{\the\pdflastobj\space 0 R}
+\pdfnames{/EmbeddedFiles << /Names [(Beyond-the-Board-source.zip) \zipspec] >>}
+\end{document}

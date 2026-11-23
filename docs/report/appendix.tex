@@ -1,0 +1,43 @@
+\refstepcounter{section}\label{app:reproducibility}
+\section*{Appendix \thesection. Project materials and reproducibility}
+\addcontentsline{toc}{section}{Appendix \thesection. Project materials and reproducibility}
+
+\subsection{Repository and data provenance}
+The group repository is \url{https://github.com/CanyonChen/Beyond-the-Board}. The
+\href{https://github.com/CanyonChen/Beyond-the-Board/tree/92dd2e7c60d5f3efc5950686f538bdd42e310a98}{archived revision \texttt{92dd2e7}}
+contains the original mixed-blitz move table and benchmark scores. The source-verified analysis, revised figures and fitted model accompany this report in the local project. All paths below are relative to its root.
+
+Game IDs in \path{data/moves.csv.gz} identify the original sample. We recovered the corresponding public move records through the \href{https://lichess.org/api#tag/Games}{Lichess game export API}. The reconstructed table, \path{data/processed/moves_verified.csv.gz}, retains all 888,993 moves from the eligible games. Of these, 839,176 have the two finite engine evaluations needed for the primary outcome. Each player starts with 180 seconds. The previous-turn duration and rolling mean are initially missing for that player and become available as their own turns accumulate.
+
+\path{data/processed/recovery_counts.json} records sequential exclusions and both the compressed and uncompressed data checksums. The SHA-256 digest below identifies the compressed table used in the model comparison.
+\begin{center}\small\ttfamily
+9faf8fd13a2196d4daad9491baa4c1fb735e0cc46a0de7793c206a87a41a554b
+\end{center}
+The timestamp alignment checks are in \path{data/processed/clock_audit.json}. The source-recovery commands and definitions of each move-level field are in \path{data/README_data.md}.
+
+\subsection{Reproducing and interpreting the estimates}
+Starting from the supplied move tables, run the following commands from the project root in a Python environment. The verified run used Python~3.13.15, scikit-learn~1.9.1 and XGBoost~3.4.1.
+{\small
+\begin{verbatim}
+python -m pip install -r requirements.txt
+python scripts/reproduce_baselines.py
+python scripts/compare_models.py --input data/processed/moves_verified.csv.gz --history provided
+python scripts/clock_subgroups.py tmp/clock_predictions.csv.gz results/model_comparison/clock_subgroups.csv
+\end{verbatim}
+}
+The modelling outputs are in \path{results/model_comparison/verified_180_0/}.
+\path{selection.json} identifies the input digest, model settings and software versions. The three development windows and the reused final week can be checked in \path{fold_metrics.csv}. For each contrast, \path{paired_log_loss.csv} records the signed difference and the 2.5th and 97.5th percentiles of 1,000 paired, whole-game bootstrap resamples. For example, \texttt{clocks\_minus\_no\_time} subtracts the loss of the position-and-ratings model from the loss after adding both clocks. Its final-week value is \(-0.000893\), equivalent to a reduction of \(0.000893\). \path{selected_calibration.csv} supplies the counts and observed and predicted probabilities for the calibration plot.
+
+With the supplied result tables in place, run \texttt{python scripts/plot\_report\_figures.py} to regenerate the clock-alignment, feature-gain, model-comparison and phase-specific error-rate plots. The source mapping and export details accompany the vector figures in \path{results/model_comparison/report_figures/manifest.json}. The project \path{README.md} gives the commands for the adjusted clock curves, sensitivity analyses, saved-model inference and report build.
+
+\subsection{Reproduction of the archived benchmark}
+Refitting the archived models reproduced the ranking in Table~\ref{tab:baseline}. Final-week log loss for histogram gradient boosting was 0.231266 in the replication and 0.231271 in the archive. Removing the archived clock readings and recent time use increased log loss by 0.00446. The archived clock fields included post-move information, so this difference cannot quantify the predictive value of the pre-move clocks.
+\begin{table}[H]\centering
+\caption{Archived mixed-blitz benchmark on 24--30 September (213,295 moves, 2,752 games). Differences in clock alignment and sample composition limit direct comparison with Table~\ref{tab:revised}.}\label{tab:baseline}
+\begin{tabular}{@{}ccccc@{}}\toprule
+Model & Log loss & Brier score & ROC AUC & AP \\\midrule
+Training prevalence & 0.28781 & 0.07673 & 0.5000 & 0.0837 \\
+L2 logistic regression & 0.26660 & 0.07369 & 0.7082 & 0.1672 \\
+Histogram gradient boosting & 0.23127 & 0.06737 & 0.8235 & 0.2800 \\\bottomrule
+\end{tabular}
+\end{table}

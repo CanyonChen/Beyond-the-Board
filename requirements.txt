@@ -3,3 +3,8 @@ pandas>=2.2
 scikit-learn>=1.9
 matplotlib>=3.8
 joblib>=1.4
+xgboost-cpu>=3.1; platform_system == 'Windows'
+xgboost>=2.1; platform_system != 'Windows'
+threadpoolctl>=3.1
+python-chess>=1.999
+requests>=2.31

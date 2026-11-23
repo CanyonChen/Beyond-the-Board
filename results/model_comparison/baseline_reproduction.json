@@ -1,0 +1,48 @@
+{
+  "data": {
+    "source_file": "moves.csv.gz",
+    "source_bytes": 20696869,
+    "rows_in_file": 953174,
+    "duplicate_rows_removed": 25872,
+    "rows_used": 913510,
+    "games_used": 11812,
+    "positive_rate": 0.08309378112992742,
+    "date_min": "2026-09-01",
+    "date_max": "2026-09-30",
+    "label_rule": "winning chance drops by >= 10 pp",
+    "label_check_rows": 903656,
+    "label_check_agreement": 1.0,
+    "evaluation_handling": "finite engine evaluations only, no centipawn cap",
+    "constant_columns_dropped": [
+      "think_missing"
+    ]
+  },
+  "selected_configs": {
+    "logistic": {
+      "name": "lr_C1",
+      "C": 1.0
+    },
+    "hgb": {
+      "name": "leaves31_lr0.05_leaf100_l2_10",
+      "max_leaf_nodes": 31,
+      "learning_rate": 0.05,
+      "min_samples_leaf": 100,
+      "l2_regularization": 10.0
+    }
+  },
+  "sklearn": "1.9.1",
+  "max_absolute_log_loss_difference": {
+    "hgb": 0.0001279182936134715,
+    "logistic": 1.1080779582783862e-07,
+    "prevalence_benchmark": 0.0
+  },
+  "published_test_note": "Previously released outcomes, repeated here for reproduction.",
+  "environment": {
+    "python": "3.13.15",
+    "numpy": "2.5.4",
+    "pandas": "3.1.1",
+    "scipy": "1.18.1",
+    "sklearn": "1.9.1",
+    "thread_limit": 4
+  }
+}

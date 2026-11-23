@@ -1,0 +1,4 @@
+# Preserve the bytes used by the presentation checksums and figure manifest.
+docs/pre/**/*.html -text
+data/processed/clock_audit.json -text
+results/model_comparison/**/*.csv -text

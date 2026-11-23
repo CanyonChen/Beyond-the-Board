@@ -28,13 +28,13 @@ polite and avoids HTTP 429.
 
 Usage
 -----
-    python scripts/fetch_games.py \
+    python data/fetch_games.py \
         --target-players 150 --max-games 600000 \
         --since 1788220800000 --until 1790812800000 \
         --out data/raw_games.ndjson
 
     # pilot
-    python scripts/fetch_games.py --target-players 10 --out data/raw_pilot.ndjson
+    python data/fetch_games.py --target-players 10 --out data/raw/pilot.ndjson
 """
 
 import argparse
@@ -66,7 +66,8 @@ RATING_BANDS = [
 
 
 def get_top_players(n, perf_type=PERF_TYPE):
-    r = requests.get(f"{API}/player/top/{n}/{perf_type}", headers=UA_HEADERS, timeout=30)
+    r = requests.get(f"{API}/player/top/{n}/{perf_type}",
+                     headers={**UA_HEADERS, "Accept": "application/json"}, timeout=30)
     r.raise_for_status()
     users = r.json().get("users", [])
     out = []
@@ -88,6 +89,7 @@ def fetch_player_games(username, since, until, max_games=5000):
         "evals": "true",
         "moves": "true",
         "tags": "true",
+        "pgnInJson": "true",
         "opening": "false",
         "literate": "false",
     }
@@ -154,21 +156,31 @@ def main():
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
+    os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
     seen_path = args.out + ".seen"
     seen = load_seen(seen_path)
+    game_ids = set()
+    known_players = {}
+    if os.path.exists(args.out):
+        with open(args.out, encoding="utf-8") as existing:
+            for line in existing:
+                if line.strip():
+                    game = json.loads(line)
+                    game_ids.add(game["id"])
+                    for pid, name, rating in opponents_of(game):
+                        known_players[name] = (pid, name, rating)
     print(f"[fetch] resumed: {len(seen)} players already fetched", file=sys.stderr)
 
     # Seed queue with leaderboard (rating known).
-    queue = []  # (id, username, rating_or_None)
     print("[fetch] seeding from leaderboard ...", file=sys.stderr)
     for pid, uname, rating in get_top_players(args.top_n, PERF_TYPE):
-        if uname not in seen:
-            queue.append((pid, uname, rating))
+        known_players[uname] = (pid, uname, rating)
+    queue = [entry for name, entry in known_players.items() if name not in seen]
 
     print(f"[fetch] seed queue size: {len(queue)}", file=sys.stderr)
 
-    total_games = 0
-    fetched_count = 0
+    total_games = len(game_ids)
+    fetched_count = len(seen)
     failed = []
     band_counts = Counter()
 
@@ -182,32 +194,34 @@ def main():
                 return band_counts.get(band_of(item[2]), 0)
             queue.sort(key=band_key)
             pid, username, rating = queue.pop(0)
-            if username in seen:
-                continue
-            seen.add(username)
-
             try:
                 games = fetch_player_games(username, args.since, args.until,
                                            max_games=args.max_per_player)
             except Exception as e:
                 print(f"[fetch] FAIL {username}: {e}", file=sys.stderr)
                 failed.append(username)
-                save_seen(seen_path, seen)
-                time.sleep(args.sleep * 2)
+                time.sleep(max(60, args.sleep * 2) if "429" in str(e) else args.sleep * 2)
                 continue
 
             kept = 0
             for g in games:
-                if not g.get("clocks") or not g.get("analysis"):
+                clock = g.get("clock") or {}
+                if (g.get("rated") is not True or g.get("variant") != "standard"
+                        or clock.get("initial") != 180 or clock.get("increment") != 0
+                        or not g.get("clocks") or not g.get("analysis")):
                     continue
-                out.write(json.dumps(g) + "\n")
-                kept += 1
+                if g["id"] not in game_ids and total_games + kept < args.max_games:
+                    out.write(json.dumps(g) + "\n")
+                    game_ids.add(g["id"])
+                    kept += 1
                 # Harvest opponents for the snowball.
                 for oid, oname, orating in opponents_of(g):
-                    if oname not in seen:
+                    if oname not in known_players and oname not in seen:
+                        known_players[oname] = (oid, oname, orating)
                         queue.append((oid, oname, orating))
 
             total_games += kept
+            seen.add(username)
             fetched_count += 1
 
             band = band_of(rating)

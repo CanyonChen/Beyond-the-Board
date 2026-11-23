@@ -1,4 +1,6 @@
-# Methodology: Model Construction and Implementation
+# Archived model specification
+
+The sections below document the group's first modelling run. The [follow-up protocol](../experiment/evaluation.md) and [data reconstruction notes](../data/README_data.md) document the corrected study. Source records revealed that the original clock extraction advanced one half-move too far.
 
 **Scope.** This material covers how the models were specified, implemented and
 selected. It states what the pipeline computes and how it is reproduced; it does
@@ -9,13 +11,7 @@ report. Configuration-by-configuration validation scores are in
 
 ## 3.1 Prediction time and target
 
-A prediction is made at the start of the mover's turn, before any time is spent
-on the current move. Every input is therefore measurable at that moment: the
-mover's starting clock comes from their previous move, the opponent's clock from
-the immediately preceding ply, and historical thinking times only from completed
-earlier turns. Board inputs describe the position before the move. The current
-move's elapsed time, the resulting position, annotation symbols and the game
-result are never used as predictors.
+The intended prediction time is the start of the mover's turn. Board inputs describe the position before the move. In the distributed table the column named opponent clock contained the mover's reading after the predicted move on all 913,510 labelled moves. Historical clock features also mixed both sides. The archived run measures performance on that table. The reconstruction records the official clock after a move only after emitting the current feature row and maintains a separate history for each side.
 
 ## 3.2 Label
 
@@ -28,9 +24,7 @@ y = 1  if  W(c_before) - W(c_after) >= 10 percentage points,  else y = 0
 ```
 
 This is a study-defined threshold for a serious error, not an official Lichess
-label. Evaluations are used exactly as delivered: there is no centipawn cap and
-no sentinel substitution for missing values. Rows without a finite evaluation on
-both sides of the move cannot be labelled and are excluded.
+label. The archived training script consumed the finite scores present in its input table. The upstream extractor encoded mate scores as numeric proxies and discarded the source flags. The source-verified analysis instead identifies finite and mate evaluations directly.
 
 The stored label was re-derived from adjacent evaluations inside the pipeline
 and reproduced on 903,656 of 903,656 checkable rows (agreement 1.0000). A
@@ -41,9 +35,9 @@ twice), leaving 913,510 labelled moves from 11,812 games.
 
 | Group | Variables |
 |---|---|
-| Clock | mover's remaining seconds, opponent's remaining seconds, clock share |
+| Clock | two stored clock columns and their ratio; the archived opponent-clock column contained the current mover's post-move value |
 | Player | mover rating, opponent rating, rating difference |
-| Time use | previous own thinking time, three-turn mean, history-missing flag |
+| Time use | stored previous clock change, three-half-move mean, history-missing flag (the legacy history mixes both sides) |
 | Board | material advantage (cp), non-pawn material, legal-move count, in check, phase |
 | Position strength | pre-move engine evaluation (cp) |
 | Structure | full-move number, colour |
@@ -87,7 +81,7 @@ scored with log loss.
 | Histogram gradient boosting | `early_stopping = False`, `max_iter = 250`; grid over `max_leaf_nodes ∈ {15, 31, 63}`, `learning_rate ∈ {0.05, 0.10}`, `min_samples_leaf ∈ {50, 100}`, `l2_regularization ∈ {1, 10}` |
 
 Five boosting and four logistic configurations were evaluated, within the
-pre-registered limit of twelve per model. Internal early stopping is disabled,
+proposal's limit of twelve per model. Internal early stopping is disabled,
 as required by the proposal: with the default behaviour the boosting model draws
 a random validation split that ignores `game_id`, which would let the same game
 inform both fitting and stopping.
@@ -137,7 +131,7 @@ precision.
 | Drop pre-move evaluation | Same configuration refitted without the engine score (37 columns) |
 | Label sensitivity | Labels rebuilt at 5 pp, 15 pp and a 150 cp loss, same split and configuration |
 | Player-disjoint check | Not available: the table carries no player identifiers |
-| Mate-inclusive analysis | Not available: the annotated sample holds finite evaluations only |
+| Mate-inclusive analysis | Original table lacks explicit mate flags; the source reconstruction retains them |
 
 ## 3.9 Reproducibility
 

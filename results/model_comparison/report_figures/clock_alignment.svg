@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg role="img" aria-labelledby="clock_alignment-title clock_alignment-desc" xmlns:xlink="http://www.w3.org/1999/xlink" width="648pt" height="194.4pt" viewBox="0 0 648 194.4" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <title id="clock_alignment-title">Clock alignment in the archived move data</title>
+<desc id="clock_alignment-desc">Agreement with PGN clocks. Corrected index: 926,332/926,332 (100%); Archived index: 52,856/926,332 (5.71%). Archived opponent clock. Mover after move: 913,510/913,510 (100%); Opponent before move: 15,478/913,510 (1.69%). The exact-match outcomes in the second panel can overlap.</desc>
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:title>Clock alignment in the archived move data</dc:title>
+    <dc:description>Agreement with PGN clocks. Corrected index: 926,332/926,332 (100%); Archived index: 52,856/926,332 (5.71%). Archived opponent clock. Mover after move: 913,510/913,510 (100%); Opponent before move: 15,478/913,510 (1.69%). The exact-match outcomes in the second panel can overlap.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 194.4 
+L 648 194.4 
+L 648 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 96.494927 158.398901 
+L 285.034062 158.398901 
+L 285.034062 21.358521 
+L 96.494927 21.358521 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <path d="M 96.494927 158.398901 
+L 96.494927 21.358521 
+" clip-path="url(#pe8980f6f4e)" style="fill: none; stroke: #d5dada; stroke-width: 0.65; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_2">
+      <defs>
+       <path id="m3b85912408" d="M 0 0 
+L 0 3 
+" style="stroke: #555d61; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m3b85912408" x="96.494927" y="158.398901" style="fill: #555d61; stroke: #555d61; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #555d61" x="96.494927" y="173.756323" transform="rotate(-0 96.494927 173.756323)">0%</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_3">
+      <path d="M 190.764495 158.398901 
+L 190.764495 21.358521 
+" clip-path="url(#pe8980f6f4e)" style="fill: none; stroke: #d5dada; stroke-width: 0.65; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#m3b85912408" x="190.764495" y="158.398901" style="fill: #555d61; stroke: #555d61; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #555d61" x="190.764495" y="173.756323" transform="rotate(-0 190.764495 173.756323)">50%</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_5">
+      <path d="M 285.034062 158.398901 
+L 285.034062 21.358521 
+" clip-path="url(#pe8980f6f4e)" style="fill: none; stroke: #d5dada; stroke-width: 0.65; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#m3b85912408" x="285.034062" y="158.398901" style="fill: #555d61; stroke: #555d61; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #555d61" x="285.034062" y="173.756323" transform="rotate(-0 285.034062 173.756323)">100%</text>
+     </g>
+    </g>
+    <g id="text_4">
+     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #1d1d1f" x="190.764495" y="188.757182" transform="rotate(-0 190.764495 188.757182)">Readings within ±0.5 s</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_7"/>
+     <g id="text_5">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #1d1d1f" x="90.494927" y="62.335542" transform="rotate(-0 90.494927 62.335542)">Corrected index</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_8"/>
+     <g id="text_6">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #1d1d1f" x="90.494927" y="125.780162" transform="rotate(-0 90.494927 125.780162)">Archived index</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_3">
+    <path d="M 96.494927 70.210879 
+L 285.034062 70.210879 
+L 285.034062 46.101923 
+L 96.494927 46.101923 
+z
+" clip-path="url(#pe8980f6f4e)" style="fill: #bf165e"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 96.494927 133.655499 
+L 107.252868 133.655499 
+L 107.252868 109.546543 
+L 96.494927 109.546543 
+z
+" clip-path="url(#pe8980f6f4e)" style="fill: #555d61"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 96.494927 158.398901 
+L 285.034062 158.398901 
+" style="fill: none; stroke: #555d61; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_7">
+    <text style="font-weight: 700; font-size: 10.5px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #ffffff" x="280.034062" y="60.88394" transform="rotate(-0 280.034062 60.88394)">100%</text>
+   </g>
+   <g id="text_8">
+    <text style="font-weight: 700; font-size: 10.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #1d1d1f" x="112.252868" y="124.32856" transform="rotate(-0 112.252868 124.32856)">5.71%</text>
+   </g>
+   <g id="text_9">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #1d1d1f" x="190.764495" y="11.358521" transform="rotate(-0 190.764495 11.358521)">Agreement with PGN clocks</text>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="patch_6">
+    <path d="M 440.736641 158.398901 
+L 629.275776 158.398901 
+L 629.275776 21.358521 
+L 440.736641 21.358521 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="matplotlib.axis_3">
+    <g id="xtick_4">
+     <g id="line2d_9">
+      <path d="M 440.736641 158.398901 
+L 440.736641 21.358521 
+" clip-path="url(#p84fafd2057)" style="fill: none; stroke: #d5dada; stroke-width: 0.65; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_10">
+      <g>
+       <use xlink:href="#m3b85912408" x="440.736641" y="158.398901" style="fill: #555d61; stroke: #555d61; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_10">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #555d61" x="440.736641" y="173.756323" transform="rotate(-0 440.736641 173.756323)">0%</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_11">
+      <path d="M 535.006208 158.398901 
+L 535.006208 21.358521 
+" clip-path="url(#p84fafd2057)" style="fill: none; stroke: #d5dada; stroke-width: 0.65; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_12">
+      <g>
+       <use xlink:href="#m3b85912408" x="535.006208" y="158.398901" style="fill: #555d61; stroke: #555d61; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_11">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #555d61" x="535.006208" y="173.756323" transform="rotate(-0 535.006208 173.756323)">50%</text>
+     </g>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_13">
+      <path d="M 629.275776 158.398901 
+L 629.275776 21.358521 
+" clip-path="url(#p84fafd2057)" style="fill: none; stroke: #d5dada; stroke-width: 0.65; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_14">
+      <g>
+       <use xlink:href="#m3b85912408" x="629.275776" y="158.398901" style="fill: #555d61; stroke: #555d61; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_12">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #555d61" x="629.275776" y="173.756323" transform="rotate(-0 629.275776 173.756323)">100%</text>
+     </g>
+    </g>
+    <g id="text_13">
+     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #1d1d1f" x="535.006208" y="188.757182" transform="rotate(-0 535.006208 188.757182)">Labelled moves with an exact match</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_4">
+    <g id="ytick_3">
+     <g id="line2d_15"/>
+     <g id="text_14">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #1d1d1f" x="434.736641" y="62.335542" transform="rotate(-0 434.736641 62.335542)">Mover after move</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_16"/>
+     <g id="text_15">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #1d1d1f" x="434.736641" y="125.780162" transform="rotate(-0 434.736641 125.780162)">Opponent before move</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_7">
+    <path d="M 440.736641 70.210879 
+L 629.275776 70.210879 
+L 629.275776 46.101923 
+L 440.736641 46.101923 
+z
+" clip-path="url(#p84fafd2057)" style="fill: #bf165e"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 440.736641 133.655499 
+L 443.931142 133.655499 
+L 443.931142 109.546543 
+L 440.736641 109.546543 
+z
+" clip-path="url(#p84fafd2057)" style="fill: #555d61"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 440.736641 158.398901 
+L 629.275776 158.398901 
+" style="fill: none; stroke: #555d61; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_16">
+    <text style="font-weight: 700; font-size: 10.5px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #ffffff" x="624.275776" y="60.88394" transform="rotate(-0 624.275776 60.88394)">100%</text>
+   </g>
+   <g id="text_17">
+    <text style="font-weight: 700; font-size: 10.5px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #1d1d1f" x="448.931142" y="124.32856" transform="rotate(-0 448.931142 124.32856)">1.69%</text>
+   </g>
+   <g id="text_18">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #1d1d1f" x="535.006208" y="11.358521" transform="rotate(-0 535.006208 11.358521)">Archived opponent clock</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pe8980f6f4e">
+   <rect x="96.494927" y="21.358521" width="188.539135" height="137.040379"/>
+  </clipPath>
+  <clipPath id="p84fafd2057">
+   <rect x="440.736641" y="21.358521" width="188.539135" height="137.040379"/>
+  </clipPath>
+ </defs>
+</svg>

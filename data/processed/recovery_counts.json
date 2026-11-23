@@ -1,0 +1,22 @@
+{
+  "clock_gain_tolerance_seconds": 1.0,
+  "decompressed_csv_sha256": "a211584aa32387b1ee39ba99a9263a38c152a54079c38fec1b891e3690a5a802",
+  "excluded_clock_gain_above_tolerance": 23,
+  "excluded_not_rated_standard": 37,
+  "excluded_time_control_other_or_missing": 520,
+  "included_games": 11253,
+  "largest_excluded_clock_gain_seconds": 535.28,
+  "mate_inclusive_labeled_rows": 875889,
+  "output_file_sha256": "9faf8fd13a2196d4daad9491baa4c1fb735e0cc46a0de7793c206a87a41a554b",
+  "primary_labeled_games": 11253,
+  "primary_labeled_rows": 839176,
+  "rows": 888993,
+  "time_controls": {
+    "180+0": 11302,
+    "180+1": 1,
+    "180+2": 209,
+    "300+0": 281,
+    "300+3": 40
+  },
+  "unique_source_games": 11833
+}

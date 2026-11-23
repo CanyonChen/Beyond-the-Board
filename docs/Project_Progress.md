@@ -1,40 +1,54 @@
 # SixSixGoSmooth 项目进度
 
-本组的 DSC5001 项目关注棋手下一步出现严重失误的概率。在已知棋手等级分和当前局面时，加入回合开始时的剩余时间能否改善预测？成员分工与原定排期分别见[项目提案第 1 页和第 3 页](Team-Proposal-SixSixGoSmooth.pdf)。
+更新至 2026 年 11 月 23 日。DSC5001 小组项目研究三分钟快棋中，在已知局面与双方等级分的情况下，回合开始时的棋钟读数能为下一步严重失误的预测增加多少信息。项目范围和原定排期见[项目提案](Team-Proposal-SixSixGoSmooth.pdf)。
 
-## 当前进展（2026-11-16）
+## 六位组员的进度
 
-提案和成员名单已归档。`data/`、`scripts/` 和 `results/` 目前仅含占位文件。按提案排期，11 月 15–21 日应进行最终测试。当前应先核对 200 局试采样中有多少对局和走子可用，以及开发集验证选出了哪些模型配置。
-
-## 成员分工与下一步
-
-| 成员 | 提案分工 | 目前可核实的进展 | 下一步 |
+| 组员 | 提案分工 | 已完成的交付与依据 | 当前汇报分工 |
 | --- | --- | --- | --- |
-| Wenxi GUAN | 收集、整理和预处理数据，编写数据说明 | 数据获取（Lichess API 路线）​由于 Lichess 全量 9 月标准棋谱压缩包约 29.2GB（约 8960 万局）​，单连接被限速约 1MB/s、多线程触发 HTTP 429 反爬、BT 种子无源，全量下载不可行，最终改用 Lichess 官方 API 按条件拉取所需子集。采样方法为滚雪球 + 分档优先：以 blitz 排行榜前 100 名为种子，把对手加入队列，并按评级段（rating band）​优先补足低分段，避免只采到高手、实际采集：150 名玩家、12,131 局（2026 年 9 月、有评分、180+0 快棋、含引擎分析与走钟数据的对局）。 |交付最终数据集|
-| Canyang CHEN | 设计研究方法、规划建模流程，撰写报告中的相应章节 | 提案已定义预测时点、严重失误标签和时间验证方案 | 用试采样棋谱核对回合开始时可用的特征，以及走子前后引擎评分生成的标签，将核对结果写入方法章节。 |
-| Geyunqing SHI | 构建和实现模型，参与方法说明与展示材料制作 | 提案已选定模型，具体实现待登记 | 实现训练集失误率基线、L2 正则化逻辑回归和基于直方图的梯度提升模型，记录运行方式。 |
-| Siying CHEN | 完善建模方案、整合各项工作，协调报告与幻灯片制作 | 提案已列出全组交付物，报告和幻灯片的整合进度待登记 | 核对各模型的比较条件，汇总已有材料，在报告与幻灯片提纲中标出待补图表。 |
-| Yibo LIU | 执行实验方案、搭建实验流程，训练和测试模型 | 提案已划定验证窗口和最终测试集，运行记录待登记 | 记录三个时间验证窗口的对数损失和选定配置。模型确定后，在 9 月 24–30 日的留出对局上测试一次。 |
-| Senyuan WU | 评估模型，分析、可视化并总结结果，参与撰写和汇报实验部分 | 提案已确定主要指标，评估表和图表待登记 | 比较加入用时特征前后的对数损失（log loss），绘制校准图，总结剩余时间对预测的实际贡献。 |
+| CHEN Canyang | 设计研究方法和建模流程，负责报告的相应部分 | 建立项目仓库，归档提案和组队表，建立项目进度文档。研究设计和最终方法章节的具体个人贡献待组内确认。[项目初始化](https://github.com/CanyonChen/Beyond-the-Board/commit/b4448e68f8426f5328feb3310f4bba4d840ef17c) · [进度记录](https://github.com/CanyonChen/Beyond-the-Board/commit/8b9397dfcb8ecd91bf672f0a81331c76927a7766) | 第 4 页，研究设计与三套输入，0:55 |
+| CHEN Siying | 完善建模方案，整合项目工作，协调报告和幻灯片 | 完成建模方案完善、项目材料整合及报告与幻灯片协调，11 月 23 日经组内确认。[研究报告](report/Beyond_the_Board_Report.pdf) · [贡献附录](Team-SixSixGoSmooth-Appendix.pdf) | 第 1–2 页，研究问题与棋局示例，1:10 |
+| GUAN Wenxi | 采集、整理和预处理数据，准备数据说明 | 通过 Lichess API 采集棋局，预处理原始走法数据，交付采集与转换脚本、走法表及数据说明。[数据交付](https://github.com/CanyonChen/Beyond-the-Board/commit/f2c681e0be8c2489ec55fbb363ac6953f71e8f86) · [采集记录](https://github.com/CanyonChen/Beyond-the-Board/commit/87aa01f8eacefd3a4e21599ab0fe9219db3b72ba) | 第 3 页，时钟错位与重建，0:55 |
+| LIU Yibo | 执行实验方案，搭建实验流程，训练和测试模型 | 完成实验流程搭建及模型训练和测试，11 月 23 日经组内确认。[评估方案](../experiment/evaluation.md) · [实验记录](../experiment/results.md) · [贡献附录](Team-SixSixGoSmooth-Appendix.pdf) | 第 6–7 页，用时特征的总体增益与阶段结果，1:40 |
+| SHI Geyunqing | 构建和实现模型，撰写方法说明并准备展示材料 | 实现原始失误率基线、L2 正则逻辑回归和直方图梯度提升，提交原方法说明、早期汇报提纲及基准评估表和图。[建模与方法](https://github.com/CanyonChen/Beyond-the-Board/commit/f430a045a849deae184541d6762851490f2a511e) · [原评估结果](https://github.com/CanyonChen/Beyond-the-Board/commit/eede3daec7dd6b3fc659e7c7e7e3de32b95748a9) · [固定配置复跑](https://github.com/CanyonChen/Beyond-the-Board/commit/92dd2e7c60d5f3efc5950686f538bdd42e310a98) | 第 5 页，按时间窗口验证与模型选择，1:00 |
+| WU Senyuan | 评估模型，分析、可视化和总结实验结果，准备实验汇报 | 复算末周指标、用时特征对照、风险校准、配对区间及敏感性实验，核对图表并修订实验结论。准备全组英文讲稿及实验展示内容。[评估复核](Evaluation-Review-Senyuan-WU.md) · [完整英文讲稿](Full-Presentation-Script.pdf) | 第 8–10 页，校准、棋手互斥检验与结论，1:50 |
 
-## 提案里程碑
+时钟修复、校正样本重建、完整新版实验及最终报告和幻灯片的具体个人分工，待小组核对实际承担的部分。上表的汇报页码用于排练。已确认的个人交付见[贡献与源码附录](Team-SixSixGoSmooth-Appendix.pdf)。
 
-| 原定时间（2026 年） | 计划交付 | 当前记录 |
-| --- | --- | --- |
-| 10 月 31 日前 | 确定研究范围并提交提案 | 提案文件已归档，课程提交状态待确认。 |
-| 11 月 1–7 日 | 完成 200 局试采样，确定最终抽样方案，核查时钟与标签 | 原先先下载全量数据再做pilot的方案替换为 API 方案下，先用 5 个玩家、224 盘做了小样本验证，确认特征和标签 pipeline 跑通、blunder 占比约 6-8% 合理后，再扩展成 150 人 / 12131 盘。|
-| 11 月 8–14 日 | 完成探索性分析与模型调参 | 待补探索图表及时间验证结果。 |
-| 11 月 15–21 日 | 测试已定型的模型，完成预设的稳健性检验 | 待补最终测试、移除用时特征的对照实验及标签阈值检验结果。 |
-| 11 月 22–28 日 | 完成报告、海报与代码附录，提交前由全组审阅 | 待汇总各项交付物。 |
+## 项目阶段与小组成果
 
-## 更新记录
+| 日期 | 进度 |
+| --- | --- |
+| 10 月 28 日至 11 月 16 日 | 归档提案与组队资料，完成小样本验证并开展正式采集。数据采集采用 Lichess API，从快棋排行榜种子棋手扩展到其对手并优先填补评级段，向 150 位棋手查询后共取得 12,131 条棋局记录。 |
+| 11 月 19–20 日 | 完成原始基线和模型评估。原始表的 913,510 条有标签走法和对应指标保留供复现。发现旧表的棋钟索引问题和混合时限后，重新核对官方原谱，重建走前时钟与同一棋手的近期用时，再完成校正样本的模型比较与敏感性分析。 |
+| 11 月 21–23 日 | 完成英文研究报告、10 页课程展示、团队贡献与源码附录。11 月 23 日复核末周评估和图表，整理六人英文讲稿与展示备注。 |
 
-每次项目更新时，在表末追加一行，并同步修改受影响的成员进度或里程碑。可在“本次进展”中填写实际样本数、指标或相关文件链接。
+### 数据与评估核验
 
-| 日期 | 更新人 | 本次进展 | 下一步 |
-| --- | --- | --- | --- |
-| 2026-10-28 | 项目组 | 归档[项目提案](Team-Proposal-SixSixGoSmooth.pdf)和[成员名单](5001_GroupSixSixGoSmooth.docx)，建立数据、脚本与结果目录。 | 按提案开展 200 局试采样。 |
-| 2026-11-16 | 项目组 | 建立中文进度文档，并将每次更新均须登记的要求写入 [README](../README.md#project-status)。 | 各负责人补记已有成果，优先核对试采样统计与调参记录。 |
-| 2026-11-16 | Wenxi GUAN | 从lichess官网上下载数据并进行数据的预处理，已经放入data文件夹。 | 交付最终数据集 |
-| 2026-11-19 | Geyunqing SHI | 完成模型构建与实现并提交：`scripts/` 含失误率基线、L2 正则逻辑回归（样条 + 时钟×评分/时钟×阶段交互）与直方图梯度提升（关闭内部早停，5 组配置）；`results/selection.json` 记录三窗口 × 9 组配置的验证 log loss（逻辑回归最优 C=1，均 0.26770；梯度提升最优 31 叶/0.05/叶 100/L2=10，均 0.23523）。方法材料见 [Methodology](Methodology.md)，汇报提纲见 [Slides-outline](Slides-outline.md)。实际样本 913,510 步 / 11,812 局，源文件 953,174 行中 25,872 行为整局重复记录，已在脚本内去重、标签复算一致率 1.0000。 | Canyang CHEN 合并方法章节；Senyuan WU 接手评估与图表定稿；Siying CHEN 汇总报告与幻灯片。 |
+- 找回全部 11,833 个不同原始棋局 ID。先排除 37 局自定义开局，再排除 520 局时限不符和 23 局棋钟异常增加的对局。最终保留 11,253 局三分钟无加秒棋局，重建 888,993 步。主分析的 839,176 条有标签走法包括 69,799 次严重失误。[数据说明](../data/README_data.md) · [样本筛选统计](../data/processed/recovery_counts.json)
+- 原表 913,510 条有标签走法的“对手钟”字段全部等于行棋方的走后读数。校正后的索引在 926,332 条可比读数中均与棋谱记录相差至多 0.5 秒。原表指标保留作历史复现，走前棋钟的增益以校正数据上的比较为依据。[全量时钟审计](../data/processed/clock_audit.json) · [原始基准复现](../results/model_comparison/baseline_reproduction.json)
+- [校正后的数据表](../data/processed/moves_verified.csv.gz)的 SHA-256 为 `9faf8fd13a2196d4daad9491baa4c1fb735e0cc46a0de7793c206a87a41a554b`。开发期为 9 月 1–23 日，含 8,621 局、642,668 条有标签走法。末周为 9 月 24–30 日，含 2,632 局、196,508 条有标签走法。两期按整局拆分，末周已用于早期分析。[评估方案](../experiment/evaluation.md)
+- 11 月 23 日复核了三个开发窗口的既有结果，重新评分全部末周走法，并重拟合两组输入对照及七项敏感性设置。主指标、分组校准、配对区间和敏感性结果均与已发布结果一致，最大绝对差为 0.0。6 项数据测试和 4 项模型测试通过。[复核报告](Evaluation-Review-Senyuan-WU.md) · [复核汇总](../results/model_comparison/review_2026_11_23/review_summary.json)
 
+### 主要研究结果
+
+| 比较 | 结果与解释 |
+| --- | --- |
+| 模型选择 | 加零风险规则的直方图梯度提升模型在三个开发窗口的平均 log loss 最低，为 0.239866。该模型的末周 log loss 为 0.235150，ROC AUC 为 0.81227，平均精确率为 0.26014。[模型选择结果](../results/model_comparison/verified_180_0/selection.json) · [末周指标](../results/model_comparison/verified_180_0/published_test_metrics.csv) |
+| 用时信息的增益 | 同一批末周走法上，log loss 从仅用局面和等级分的 0.236168，降至加入双方走前时钟后的 0.235275，再降至加入本人近期用时后的 0.235150。相对降幅为 0.43%，绝对降幅为 0.001018，按整局配对的 95% 区间为 0.000658–0.001429。在这一加入顺序下，双方走前时钟贡献约 88% 的增益。[配对区间](../results/model_comparison/verified_180_0/paired_log_loss.csv) |
+| 阶段与校准 | 仅新增双方走前时钟时，开局、中局、残局的 log loss 降幅点估计分别为 0.000585、0.000733、0.002147。各区间描述阶段内的不确定性。完整模型的最高风险十分位平均预测 28.12%，实测 28.87%，全末周实测 8.35%。[阶段比较](../results/model_comparison/clock_subgroups.csv) · [分组校准](../results/model_comparison/verified_180_0/selected_calibration.csv) |
+| 棋手互斥检验 | 排除涉及末周棋手的训练对局后，训练从 8,621 局缩至 509 局，同一批末周走法的 log loss 从 0.235150 升至 0.246045。训练量和棋手构成同时改变，这一差值反映两者共同变化下的表现。[敏感性结果](../results/model_comparison/robustness.csv) |
+
+以上结果描述这批有引擎注释的三分钟快棋中的预测表现。新月份的表现有待独立评估，改变可用时长对失误风险的因果影响需要另外的研究设计。完整解释、附录及复现入口见[研究报告](report/Beyond_the_Board_Report.pdf)、[实验记录](../experiment/results.md)与[运行说明](../README.md#run-locally)。
+
+## 课程交付与剩余事项
+
+组队资料与提案已按项目记录提交。最终三项由一位代表分别提交，截止时间为 **2026 年 11 月 28 日 23:59（香港时间）**。[项目说明](https://canvas.cityu.edu.hk/courses/72915/files/folder/Project?preview=16044993) · [提交对照](Slides-outline.md#canvas-submission)
+
+| 交付物 | 当前状态 |
+| --- | --- |
+| [Team-SixSixGoSmooth-PPT.pdf](pre/Team-SixSixGoSmooth-PPT.pdf) | 10 页，含封面。封面包含课程名、项目题目、队名、六位成员姓名与学号以及制作日期。文件已备，Canvas 上传状态待核实。 |
+| Team-SixSixGoSmooth-Recording.mp4 | 六人均需参加 Zoom 录制，全片最多 8 分钟。讲稿目标 **7:30，已含交接**，录制成片及实际时长待核实。[完整英文讲稿](Full-Presentation-Script.pdf) · [逐页分工与时间](Slides-outline.md) · [HTML 展示稿，按 N 看讲者备注](pre/deck.html) |
+| [Team-SixSixGoSmooth-Appendix.pdf](Team-SixSixGoSmooth-Appendix.pdf) | 单页，列出六人的已确认贡献及来源，附[源码 ZIP](appendix-assets/Beyond-the-Board-source.zip)和[项目仓库](https://github.com/CanyonChen/Beyond-the-Board)。待小组核对尚未确认的个人分工，Canvas 上传状态待核实。 |
+
+组内排练时，按 CHEN Siying、GUAN Wenxi、CHEN Canyang、SHI Geyunqing、LIU Yibo、WU Senyuan 的顺序讲解。录制后核对实际时长，由小组代表完成并核验三项提交。

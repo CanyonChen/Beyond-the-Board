@@ -1,0 +1,53 @@
+{
+  "family": "hgb",
+  "gate": true,
+  "development_log_loss": 0.23986638679291342,
+  "selection": "Lowest equal-window mean log loss among two fixed tree families x rule on/off, using all features.",
+  "data": {
+    "source": "moves_verified.csv.gz",
+    "sha256": "9faf8fd13a2196d4daad9491baa4c1fb735e0cc46a0de7793c206a87a41a554b",
+    "history": "provided",
+    "source_rows": 888993,
+    "identical_duplicates": 0,
+    "moves": 839176,
+    "games": 11253,
+    "positives": 69799,
+    "prevalence": 0.08317563896012278
+  },
+  "hgb_config": {
+    "name": "leaves31_lr0.05_leaf100_l2_10",
+    "max_leaf_nodes": 31,
+    "learning_rate": 0.05,
+    "min_samples_leaf": 100,
+    "l2_regularization": 10.0
+  },
+  "logistic_config": {
+    "name": "lr_C1",
+    "C": 1.0
+  },
+  "xgb_config": {
+    "n_estimators": 250,
+    "max_depth": 5,
+    "learning_rate": 0.05,
+    "min_child_weight": 5,
+    "reg_lambda": 10,
+    "subsample": 1.0,
+    "colsample_bytree": 1.0,
+    "max_bin": 255,
+    "tree_method": "hist",
+    "objective": "binary:logistic",
+    "eval_metric": "logloss",
+    "random_state": 42,
+    "n_jobs": 4
+  },
+  "versions": {
+    "python": "3.13.15",
+    "numpy": "2.5.4",
+    "pandas": "3.1.1",
+    "scipy": "1.18.1",
+    "sklearn": "1.9.1",
+    "xgboost": "3.4.1",
+    "joblib": "1.6.0",
+    "thread_limit": 4
+  }
+}

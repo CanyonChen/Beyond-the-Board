@@ -1,6 +1,6 @@
 # SixSixGoSmooth 项目进度
 
-更新至 2026 年 11 月 23 日。DSC5001 小组项目研究三分钟快棋中，在已知局面与双方等级分的情况下，回合开始时的棋钟读数能为下一步严重失误的预测增加多少信息。项目范围和原定排期见[项目提案](Team-Proposal-SixSixGoSmooth.pdf)。
+更新至 2026 年 11 月 27 日。DSC5001 小组项目研究三分钟快棋中，在已知局面与双方等级分的情况下，回合开始时的棋钟读数能为下一步严重失误的预测增加多少信息。项目范围和原定排期见[项目提案](Team-Proposal-SixSixGoSmooth.pdf)。
 
 ## 六位组员的进度
 
@@ -52,3 +52,18 @@
 | [Team-SixSixGoSmooth-Appendix.pdf](Team-SixSixGoSmooth-Appendix.pdf) | 单页，列出六人的已确认贡献及来源，附[源码 ZIP](appendix-assets/Beyond-the-Board-source.zip)和[项目仓库](https://github.com/CanyonChen/Beyond-the-Board)。待小组核对尚未确认的个人分工，Canvas 上传状态待核实。 |
 
 组内排练时，按 CHEN Siying、GUAN Wenxi、CHEN Canyang、SHI Geyunqing、LIU Yibo、WU Senyuan 的顺序讲解。录制后核对实际时长，由小组代表完成并核验三项提交。
+
+## 2026-11-27 仓库同步与贡献附录更新
+
+从远程 `main` 快进同步至 `9ff3cae`，取得更新后的 10 页 PPT 和新增的 15 页 [APA 格式报告](report/Beyond-the-Board-APA-report.pdf)。本轮仅同步附录材料，没有重跑实验或更改个人贡献归属。
+
+- [贡献附录](Team-SixSixGoSmooth-Appendix.pdf)中的报告链接改为 APA 版，另补完整英文讲稿链接，保留六人学号、已核实工作及原始交付依据，不写具体演讲页码。
+- [源码与材料 ZIP](appendix-assets/Beyond-the-Board-source.zip)同步当前讲稿文本，加入最新 PPT、HTML 备注和 APA 报告，保留原八页报告及分析源码。共 56 个文件，其中 19 个 Python 源文件。
+- 已逐页检查单页附录排版，核验 15 个不同链接的仓库目标、全部归档文件哈希、与本地材料的逐字节一致性及 PDF 内嵌附件。录制安排仍按当前全组讲稿执行，成片与课程平台提交状态待小组确认。
+
+| 11 月 27 日附录版本 | SHA-256 |
+| --- | --- |
+| 贡献附录 PDF | `0677f674ac75a53a485e73aff7e1f34f0f6b62fd61b3b7cc3b1c2131cebc8f2c` |
+| 内嵌源码与材料 ZIP | `3f9429e428460c3eabc2ae61e088b8696d85d2c56ec7926a91f0e601910fcfe3` |
+
+本次附录更新以 Senyuan WU 的署名提交并同步到仓库 `main`。课程平台上传状态由小组另行核实。
